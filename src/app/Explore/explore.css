@@ -1,0 +1,135 @@
+.explore-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  .mainpage-header {
+    background-color: #3b82f6;
+    color: #f9fafb;
+    padding: 16px 24px;
+  }
+  
+  .mainpage-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .mainpage-title {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .mainpage-subtitle {
+    font-size: 14px;
+  }
+  
+  .mainpage-nav {
+    display: flex;
+    gap: 16px;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .mainpage-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+  }
+  
+  .explore-content {
+    padding: 40px;
+    flex-grow: 1;
+  }
+  
+  .explore-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 30px;
+  }
+  
+  .search-box {
+    margin-bottom: 20px;
+  }
+  
+  .search-input {
+    width: 100%;
+    max-width: 600px;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+  }
+  
+  .travel-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .travel-card {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  
+  .travel-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .view-button {
+    padding: 5px 10px;
+  }
+  
+  .like-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .liked .heart-icon {
+    fill: red;
+  }
+  
+  .likes-count {
+    font-size: 0.9rem;
+  }
+  
+  .no-results {
+    text-align: center;
+    color: #6c757d;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .prev-button, .next-button {
+    padding: 5px 15px;
+  }
+  
