@@ -1,5 +1,6 @@
 "use client"
 
+import MapComponent from "./ui/MapComponent"
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "./ui/button"
@@ -7,79 +8,84 @@ import { Input } from "./ui/input"
 import { ChevronUp, ChevronDown, Trash2, Save, Upload } from 'lucide-react'
 import './styles/itinerary-planner.css';
 
-// Google Maps 컴포넌트
-function Map({ days }) {
-  const [map, setMap] = useState(null);
-  const [searchInput, setSearchInput] = useState('');
+// // 새로운 타입 정의
+// interface MapProps {
+//   days: Array<{ title: string; activities: Array<{ place: string; time: string; period: string; activity: string }> }>;
+// }
 
-  useEffect(() => {
-    // Google Maps API 스크립트 로드
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBosOmwvXAAl2z6xYy-L6D2I0agK3XpvXs&callback=initMap`;
-    script.async = true;
-    document.body.appendChild(script);
+// // Google Maps 컴포넌트
+// function Map({ days }: MapProps) {
+//   const [map, setMap] = useState(null);
+//   const [searchInput, setSearchInput] = useState('');
 
-    window.initMap = () => {
-      const newMap = new window.google.maps.Map(document.getElementById("map"), {
-        center: { lat: 48.8566, lng: 2.3522 }, // Paris coordinates
-        zoom: 13,
-      });
-      setMap(newMap);
-    };
+//   useEffect(() => {
+//     // Google Maps API 스크립트 로드
+//     const script = document.createElement('script');
+//     script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBosOmwvXAAl2z6xYy-L6D2I0agK3XpvXs&callback=initMap`;
+//     script.async = true;
+//     document.body.appendChild(script);
 
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+//     window.initMap = () => {
+//       const newMap = new window.google.maps.Map(document.getElementById("map"), {
+//         center: { lat: 48.8566, lng: 2.3522 }, // Paris coordinates
+//         zoom: 13,
+//       });
+//       setMap(newMap);
+//     };
 
-  useEffect(() => {
-    if (map) {
-      // 각 장소에 마커 추가
-      days.forEach(day => {
-        day.activities.forEach(activity => {
-          const geocoder = new window.google.maps.Geocoder();
-          geocoder.geocode({ address: activity.place }, (results, status) => {
-            if (status === 'OK') {
-              new window.google.maps.Marker({
-                map: map,
-                position: results[0].geometry.location,
-                title: activity.place
-              });
-            }
-          });
-        });
-      });
-    }
-  }, [map, days]);
+//     return () => {
+//       document.body.removeChild(script);
+//     };
+//   }, []);
 
-  const searchCountry = () => {
-    if (map) {
-      const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ address: searchInput }, (results, status) => {
-        if (status === 'OK') {
-          map.setCenter(results[0].geometry.location);
-          map.setZoom(5);
-        } else {
-          alert('검색에 실패했습니다: ' + status);
-        }
-      });
-    }
-  };
+//   useEffect(() => {
+//     if (map) {
+//       // 각 장소에 마커 추가
+//       days.forEach(day => {
+//         day.activities.forEach(activity => {
+//           const geocoder = new window.google.maps.Geocoder();
+//           geocoder.geocode({ address: activity.place }, (results, status) => {
+//             if (status === 'OK') {
+//               new window.google.maps.Marker({
+//                 map: map,
+//                 position: results[0].geometry.location,
+//                 title: activity.place
+//               });
+//             }
+//           });
+//         });
+//       });
+//     }
+//   }, [map, days]);
 
-  return (
-    <div className="map-wrapper">
-      <div id="map" className="map-container"></div>
-      <div className="search-container">
-        <Input
-          placeholder="주소 검색"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-        />
-        <Button onClick={searchCountry}>검색</Button>
-      </div>
-    </div>
-  );
-}
+//   const searchCountry = () => {
+//     if (map) {
+//       const geocoder = new window.google.maps.Geocoder();
+//       geocoder.geocode({ address: searchInput }, (results, status) => {
+//         if (status === 'OK') {
+//           map.setCenter(results[0].geometry.location);
+//           map.setZoom(5);
+//         } else {
+//           alert('검색에 실패했습니다: ' + status);
+//         }
+//       });
+//     }
+//   };
+
+//   return (
+//     <div className="map-wrapper">
+//       <div id="map" className="map-container"></div>
+//       <div className="search-container">
+//         <Input
+//           placeholder="주소 검색"
+//           value={searchInput}
+//           onChange={(e) => setSearchInput(e.target.value)}
+//         />
+//         <Button onClick={searchCountry}>검색</Button>
+//       </div>
+//     </div>
+//   );
+// }
 
 export default function Planner() {
   const [days, setDays] = useState([]);
@@ -259,33 +265,16 @@ export default function Planner() {
       <main className="flex-1">
         <div className="itinerary-container">
           <div className="itinerary-layout">
-            <div className="map-section">
-              <Map days={days} />
-            </div>
+          <MapComponent
+            days={days}
+            onSavePlan={savePlanToDatabase}
+            onLoadPlan={() => fileInputRef.current?.click()}
+            onSaveFile={saveAsFile}
+          />  
             <div className="itinerary-content">
               <div className="button-container">
                 <Button onClick={addDay} className="add-day-button">Add Day</Button>
-                <div className="plan-buttons">
-                  <Button onClick={savePlanToDatabase} className="save-plan-button">
-                    <Save className="save-icon" />
-                    Save Plan
-                  </Button>
-                  <Button onClick={() => fileInputRef.current?.click()} className="load-plan-button">
-                    <Upload className="upload-icon" />
-                    Load Plan
-                  </Button>
-                </div>
-                <Button onClick={saveAsFile} className="save-as-file-button">
-                  <Save className="save-icon" />
-                  Save as File
-                </Button> 
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={loadPlan}
-                  style={{ display: 'none' }}
-                  accept=".json"
-                />
+               
               </div>
               <div className="days-container">
                 {days.sort((a, b) => parseInt(a.title.split(' ')[1]) - parseInt(b.title.split(' ')[1])).map((day, dayIndex) => (
@@ -360,6 +349,13 @@ export default function Planner() {
           </div>
         </div>
       </main>
+      <input
+      type="file"
+      ref={fileInputRef}
+      onChange={loadPlan}
+      style={{ display: 'none' }}
+      accept=".json"
+    />
     </div>
   )
 }

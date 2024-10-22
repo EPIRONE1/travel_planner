@@ -1,4 +1,4 @@
-:root {
+/* :root {
   --primary-color: #3498db;
   --secondary-color: #2ecc71;
   --accent-color: #e74c3c;
@@ -258,7 +258,7 @@ body {
   margin-bottom: 20px;
 }
 
-.save-plan-button {
+/* .save-plan-button {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -282,11 +282,125 @@ body {
 
 .load-plan-button:hover {
   background-color: #1E88E5;
-}
+} */
 
 .upload-icon {
   width: 18px;
   height: 18px;
 }
 
-/* 나머지 스타일 유지 */
+/* 기존 스타일을 유지하면서 레이아웃 비율만 수정 */
+.itinerary-layout {
+  display: grid;
+  /* 3:2 비율로 변경 (지도:일정) */
+  grid-template-columns: 1.5fr 1fr;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+/* 지도 섹션 스타일 업데이트 */
+.map-section {
+  position: sticky;
+  top: 20px;
+  height: calc(100vh - 40px);
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-controls {
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 60%, rgba(255,255,255,0) 100%);
+}
+
+.map-controls-top {
+  margin-bottom: 12px;
+}
+
+.search-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.map-controls-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.map-container {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+/* 버튼 스타일 업데이트 */
+.save-plan-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #4CAF50;
+  color: white;
+}
+
+.save-plan-button:hover {
+  background-color: #45a049;
+}
+
+.load-plan-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2196F3;
+  color: white;
+}
+
+.load-plan-button:hover {
+  background-color: #1E88E5;
+}
+
+.save-as-file-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ff9800;
+  color: white;
+}
+
+.save-as-file-button:hover {
+  background-color: #f57c00;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 1200px) {
+  .map-section {
+    height: 60vh;
+    position: relative;
+    top: 0;
+  }
+
+  .map-controls {
+    position: relative;
+    background: white;
+  }
+}
+
+@media (max-width: 640px) {
+  .map-controls-buttons {
+    flex-direction: column;
+  }
+  
+  .search-container {
+    flex-direction: column;
+  }
+}
