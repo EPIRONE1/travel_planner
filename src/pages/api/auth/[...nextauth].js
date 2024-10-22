@@ -8,9 +8,14 @@ export default NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET, // Optional: next-auth secret for better security
-  pages: {
-    signIn: '/social_login',  // 로그인 페이지 설정 (원하는 페이지로 변경 가능)
-    // error: '/auth/error',    // 에러 발생 시 이동할 페이지 설정
+  secret: process.env.NEXTAUTH_SECRET, // Optional: Secure secret for NextAuth
+  callbacks: {
+    async signIn({ account, profile }) {
+      if (account.provider === "google" && profile.email_verified) {
+        return true; // 인증 성공
+      } else {
+        return false; // 인증 실패
+      }
+    },
   },
 });

@@ -1,16 +1,15 @@
-"use client"
+"use client";
 
 import { GoogleMap, LoadScript } from '@react-google-maps/api';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Input } from './input';
 import { Button } from './button';
 import { Search, Save, Upload } from 'lucide-react';
 
-const MapComponent = ({ onSavePlan, onLoadPlan, onSaveFile }) => {
+const MapComponent = ({ onSavePlan, onLoadPlan, onSaveFile, setPlace }) => {
   const [center, setCenter] = useState({ lat: 48.8566, lng: 2.3522 }); // Default to Paris initially
   const [searchQuery, setSearchQuery] = useState('');
   const [map, setMap] = useState(null);
-
   const mapStyles = {
     height: "100%",
     width: "100%",
@@ -33,6 +32,23 @@ const MapComponent = ({ onSavePlan, onLoadPlan, onSaveFile }) => {
     }
   };
 
+  // Get address from coordinates (reverse geocoding)
+  const getAddressFromCoordinates = async (lat, lng) => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyBosOmwvXAAl2z6xYy-L6D2I0agK3XpvXs`
+      );
+      const data = await response.json();
+      if (data.results && data.results[0]) {
+        return data.results[0].formatted_address;
+      }
+      return '';
+    } catch (error) {
+      console.error('Reverse geocoding error:', error);
+      return '';
+    }
+  };
+
   // Get user's current location and set as the map's center
   useEffect(() => {
     if (navigator.geolocation) {
@@ -52,6 +68,19 @@ const MapComponent = ({ onSavePlan, onLoadPlan, onSaveFile }) => {
       alert('Geolocation is not supported by this browser.');
     }
   }, []);
+
+  // Handle map click
+  const handleMapClick = async (event) => {
+    const { latLng } = event;
+    const lat = latLng.lat();
+    const lng = latLng.lng();
+
+    // Reverse geocode to get the address
+    const address = await getAddressFromCoordinates(lat, lng);
+    if (address) {
+      setPlace(address); // Set the address in the currently focused input field
+    }
+  };
 
   const handleSearch = async () => {
     if (!searchQuery) return;
@@ -112,12 +141,13 @@ const MapComponent = ({ onSavePlan, onLoadPlan, onSaveFile }) => {
         </div>
       </div>
       <div className="map-container">
-        <LoadScript googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY">
+        <LoadScript googleMapsApiKey="AIzaSyBosOmwvXAAl2z6xYy-L6D2I0agK3XpvXs">
           <GoogleMap
             mapContainerStyle={mapStyles}
             zoom={13}
             center={center}
             onLoad={onMapLoad}
+            onClick={handleMapClick} // Add click event listener
           >
           </GoogleMap>
         </LoadScript>

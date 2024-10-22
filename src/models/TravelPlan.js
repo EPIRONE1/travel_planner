@@ -13,10 +13,7 @@ const DaySchema = new mongoose.Schema({
 });
 
 const TravelPlanSchema = new mongoose.Schema({
-  userEmail: { type: String, required: true },  // 사용자 이메일 필드 추가
   days: [DaySchema],
 });
 
-const TravelPlan = mongoose.models.TravelPlan || mongoose.model('TravelPlan', TravelPlanSchema, 'travelplans');
-
-export default TravelPlan;
+export default mongoose.models.TravelPlan || mongoose.model('TravelPlan', TravelPlanSchema);

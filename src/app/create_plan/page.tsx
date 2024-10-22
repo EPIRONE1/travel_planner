@@ -92,6 +92,8 @@ export default function Planner() {
   const [expandedDayIndex, setExpandedDayIndex] = useState(0);
   const [deletedDays, setDeletedDays] = useState<number[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [focusedActivityIndex, setFocusedActivityIndex] = useState(null); // 현재 포커스된 입력란 추적
+
   
   useEffect(() => {
     // 페이지 로드 시 로컬 스토리지에서 데이터 불러오기
@@ -151,10 +153,18 @@ export default function Planner() {
   }
 
   const updateActivity = (dayIndex, activityIndex, field, value) => {
-    const newDays = [...days]
-    newDays[dayIndex].activities[activityIndex][field] = value
-    setDays(newDays)
-  }
+    const newDays = [...days];
+    newDays[dayIndex].activities[activityIndex][field] = value;
+    setDays(newDays);
+  };
+
+  const handlePlaceChange = (place) => {
+    if (focusedActivityIndex !== null) {
+      // 현재 포커스된 활동의 장소에 클릭된 주소를 입력
+      const { dayIndex, activityIndex } = focusedActivityIndex;
+      updateActivity(dayIndex, activityIndex, "place", place);
+    }
+  };
 
   const toggleDay = (dayIndex: number) => {
     if (expandedDayIndex === dayIndex) {
@@ -186,17 +196,16 @@ export default function Planner() {
       });
   
       if (response.ok) {
-        const result = await response.json();
-        alert(result.message);
+        alert('여행 계획이 성공적으로 저장되었습니다!');
       } else {
-        const error = await response.json();
-        alert(error.message);
+        alert('저장 중 오류가 발생했습니다.');
       }
     } catch (error) {
       console.error('저장 중 오류:', error);
       alert('서버와 연결하는 중 오류가 발생했습니다.');
     }
   };
+  
   const saveAsFile = () => {
     const dataStr = JSON.stringify(days);
     const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
@@ -270,6 +279,7 @@ export default function Planner() {
             onSavePlan={savePlanToDatabase}
             onLoadPlan={() => fileInputRef.current?.click()}
             onSaveFile={saveAsFile}
+            setPlace={handlePlaceChange} // Click된 주소를 전달할 함수
           />  
             <div className="itinerary-content">
               <div className="button-container">
@@ -302,10 +312,12 @@ export default function Planner() {
                         {day.activities.map((activity, activityIndex) => (
                           <div key={activityIndex} className="activity-item">
                             <Input
-                              placeholder="장소"
-                              value={activity.place}
-                              onChange={(e) => updateActivity(dayIndex, activityIndex, "place", e.target.value)}
-                            />
+                  key={activityIndex}
+                  value={activity.place}
+                  onChange={(e) => updateActivity(dayIndex, activityIndex, "place", e.target.value)}
+                  onFocus={() => setFocusedActivityIndex({ dayIndex, activityIndex })} // 포커스된 입력란 추적
+                  placeholder="장소"
+                />
                             <div className="time-input-container">
                               <Input
                                 className="time-input"

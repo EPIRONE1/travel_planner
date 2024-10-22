@@ -739,9 +739,6 @@ video {
 .border {
   border-width: 1px;
 }
-.border-b {
-  border-bottom-width: 1px;
-}
 .border-input {
   border-color: hsl(var(--input));
 }
