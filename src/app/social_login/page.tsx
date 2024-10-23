@@ -16,7 +16,7 @@ export default function Component() {
           <Button 
             variant="outline" 
             className="w-full"
-            onClick={() => signIn('google')}  // Google로 로그인 처리
+            onClick={() => signIn('google', { callbackUrl: '/' })}  // Google로 로그인 후 메인 페이지로 이동
           >
             Google로 로그인
           </Button>

@@ -1,4 +1,4 @@
-// File: C:\Users\redmo\OneDrive\바탕 화면\prototype_desk\travel_planner\src\app\create_plan\page.tsx
+// File: C:\Users\Lee\Desktop\prototype\src\app\create_plan\page.tsx
 import * as entry from '../../../../src/app/create_plan/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

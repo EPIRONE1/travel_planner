@@ -1,5 +1,5 @@
 {
-  "/create_plan/page": "app/create_plan/page.js",
+  "/page": "app/page.js",
   "/social_login/page": "app/social_login/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
+  "/create_plan/page": "app/create_plan/page.js"
 }

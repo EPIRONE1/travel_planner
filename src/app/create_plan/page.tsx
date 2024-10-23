@@ -88,7 +88,7 @@ import './styles/itinerary-planner.css';
 // }
 
 export default function Planner() {
-  const [days, setDays] = useState([]);
+  const [days, setDays] = useState<Array<{ title: string; activities: Array<{ place: string; time: string; period: string; activity: string }> }>>([]);
   const [expandedDayIndex, setExpandedDayIndex] = useState(0);
   const [deletedDays, setDeletedDays] = useState<number[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -115,7 +115,7 @@ export default function Planner() {
   }, []);
 
   const addDay = () => {
-    let newDayNumber;
+    let newDayNumber: number; // 타입을 명시적으로 지정
     if (deletedDays.length > 0) {
       newDayNumber = Math.min(...deletedDays);
       setDeletedDays(deletedDays.filter(day => day !== newDayNumber));
