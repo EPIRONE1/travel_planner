@@ -12,12 +12,6 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/create_plan/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/create_plan/page.css",
-      "static/chunks/app/create_plan/page.js"
-    ],
     "/social_login/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",

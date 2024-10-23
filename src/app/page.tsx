@@ -1,8 +1,18 @@
+"use client"
+
 import Link from "next/link";
 import Image from "next/image";
+import { useSession, signOut } from 'next-auth/react';
 import './mainpage.css';
 
-export default function mainpage() {
+export default function MainPage() {
+  const { data: session, status } = useSession();
+  const isLoading = status === "loading";
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/' }); // 로그아웃 후 메인 페이지로 리디렉션
+  };
+
   return (
     <div className="mainpage-container">
       <header className="mainpage-header">
@@ -29,9 +39,21 @@ export default function mainpage() {
                 </Link>
               </li>
               <li>
-                <Link href="social_login" prefetch={false} className="mainpage-link">
-                  Login
-                </Link>
+                {isLoading ? (
+                  <span className="mainpage-link">Loading...</span>
+                ) : session ? (
+                  <button 
+                    onClick={handleLogout} 
+                    className="mainpage-link"
+                    style={{ border: 'none', background: 'none', cursor: 'pointer' }}
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <Link href="social_login" prefetch={false} className="mainpage-link">
+                    Login
+                  </Link>
+                )}
               </li>
             </ul>
           </nav>

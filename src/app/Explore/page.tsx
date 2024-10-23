@@ -64,11 +64,6 @@ export default function ExplorePage() {
                   Create
                 </Link>
               </li>
-              <li>
-                <Link href="#" prefetch={false} className="mainpage-link">
-                  About
-                </Link>
-              </li>
             </ul>
           </nav>
         </div>

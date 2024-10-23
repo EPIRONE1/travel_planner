@@ -7,6 +7,7 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { ChevronUp, ChevronDown, Trash2, Save, Upload } from 'lucide-react'
 import './styles/itinerary-planner.css';
+import { useSession, signIn, signOut } from "next-auth/react"
 
 // // 새로운 타입 정의
 // interface MapProps {
@@ -88,6 +89,7 @@ import './styles/itinerary-planner.css';
 // }
 
 export default function Planner() {
+  
   const [days, setDays] = useState<Array<{ title: string; activities: Array<{ place: string; time: string; period: string; activity: string }> }>>([]);
   const [expandedDayIndex, setExpandedDayIndex] = useState(0);
   const [deletedDays, setDeletedDays] = useState<number[]>([]);
@@ -262,11 +264,6 @@ export default function Planner() {
                   Create
                 </Link>
               </li>
-              <li>
-                <Link href="#" prefetch={false} className="mainpage-link">
-                  About
-                </Link>
-              </li>
             </ul>
           </nav>
         </div>
@@ -284,7 +281,6 @@ export default function Planner() {
             <div className="itinerary-content">
               <div className="button-container">
                 <Button onClick={addDay} className="add-day-button">Add Day</Button>
-               
               </div>
               <div className="days-container">
                 {days.sort((a, b) => parseInt(a.title.split(' ')[1]) - parseInt(b.title.split(' ')[1])).map((day, dayIndex) => (
