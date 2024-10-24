@@ -6,8 +6,8 @@ import { Input } from './input';
 import { Button } from './button';
 import { Search, Save, Upload } from 'lucide-react';
 
-const MapComponent = ({ onSavePlan, onLoadPlan, onSaveFile, setPlace }) => {
-  const [center, setCenter] = useState({ lat: 48.8566, lng: 2.3522 }); // Default to Paris initially
+const MapComponent = ({ onSavePlan, onLoadFile,onLoadPlan, onSaveFile, setPlace }) => {
+  const [center, setCenter] = useState({ lat: 48.8566, lng: 2.3522 });
   const [searchQuery, setSearchQuery] = useState('');
   const [map, setMap] = useState(null);
   const mapStyles = {
@@ -130,13 +130,17 @@ const MapComponent = ({ onSavePlan, onLoadPlan, onSaveFile, setPlace }) => {
             <Save className="w-4 h-4" />
             Save Plan
           </Button>
+          <Button onClick={onSaveFile} className="save-as-file-button">
+            <Save className="w-4 h-4" />
+            Save as File
+          </Button>
           <Button onClick={onLoadPlan} className="load-plan-button">
             <Upload className="w-4 h-4" />
             Load Plan
           </Button>
-          <Button onClick={onSaveFile} className="save-as-file-button">
-            <Save className="w-4 h-4" />
-            Save as File
+          <Button onClick={onLoadFile} className="load-file-button">
+            <Upload className="w-4 h-4" />
+            Load File
           </Button>
         </div>
       </div>

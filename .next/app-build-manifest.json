@@ -12,10 +12,17 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/social_login/page": [
+    "/create_plan/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/social_login/page.js"
+      "static/css/app/create_plan/page.css",
+      "static/chunks/app/create_plan/page.js"
+    ],
+    "/Explore/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Explore/page.css",
+      "static/chunks/app/Explore/page.js"
     ]
   }
 }

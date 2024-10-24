@@ -8,88 +8,11 @@ import { Input } from "./ui/input"
 import { ChevronUp, ChevronDown, Trash2, Save, Upload } from 'lucide-react'
 import './styles/itinerary-planner.css';
 import { useSession, signIn, signOut } from "next-auth/react"
-
-// // 새로운 타입 정의
-// interface MapProps {
-//   days: Array<{ title: string; activities: Array<{ place: string; time: string; period: string; activity: string }> }>;
-// }
-
-// // Google Maps 컴포넌트
-// function Map({ days }: MapProps) {
-//   const [map, setMap] = useState(null);
-//   const [searchInput, setSearchInput] = useState('');
-
-//   useEffect(() => {
-//     // Google Maps API 스크립트 로드
-//     const script = document.createElement('script');
-//     script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBosOmwvXAAl2z6xYy-L6D2I0agK3XpvXs&callback=initMap`;
-//     script.async = true;
-//     document.body.appendChild(script);
-
-//     window.initMap = () => {
-//       const newMap = new window.google.maps.Map(document.getElementById("map"), {
-//         center: { lat: 48.8566, lng: 2.3522 }, // Paris coordinates
-//         zoom: 13,
-//       });
-//       setMap(newMap);
-//     };
-
-//     return () => {
-//       document.body.removeChild(script);
-//     };
-//   }, []);
-
-//   useEffect(() => {
-//     if (map) {
-//       // 각 장소에 마커 추가
-//       days.forEach(day => {
-//         day.activities.forEach(activity => {
-//           const geocoder = new window.google.maps.Geocoder();
-//           geocoder.geocode({ address: activity.place }, (results, status) => {
-//             if (status === 'OK') {
-//               new window.google.maps.Marker({
-//                 map: map,
-//                 position: results[0].geometry.location,
-//                 title: activity.place
-//               });
-//             }
-//           });
-//         });
-//       });
-//     }
-//   }, [map, days]);
-
-//   const searchCountry = () => {
-//     if (map) {
-//       const geocoder = new window.google.maps.Geocoder();
-//       geocoder.geocode({ address: searchInput }, (results, status) => {
-//         if (status === 'OK') {
-//           map.setCenter(results[0].geometry.location);
-//           map.setZoom(5);
-//         } else {
-//           alert('검색에 실패했습니다: ' + status);
-//         }
-//       });
-//     }
-//   };
-
-//   return (
-//     <div className="map-wrapper">
-//       <div id="map" className="map-container"></div>
-//       <div className="search-container">
-//         <Input
-//           placeholder="주소 검색"
-//           value={searchInput}
-//           onChange={(e) => setSearchInput(e.target.value)}
-//         />
-//         <Button onClick={searchCountry}>검색</Button>
-//       </div>
-//     </div>
-//   );
-// }
+import { useRouter } from "next/navigation"; // useRouter 훅을 가져오기
 
 export default function Planner() {
-  
+  const { data: session } = useSession(); // 사용자 세션 상태 확인
+  const router = useRouter(); // useRouter 훅 초기화
   const [days, setDays] = useState<Array<{ title: string; activities: Array<{ place: string; time: string; period: string; activity: string }> }>>([]);
   const [expandedDayIndex, setExpandedDayIndex] = useState(0);
   const [deletedDays, setDeletedDays] = useState<number[]>([]);
@@ -176,18 +99,16 @@ export default function Planner() {
     }
   };
 
-  // const savePlan = () => {
-  //   const dataStr = JSON.stringify(days);
-  //   const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-  //   const exportFileDefaultName = 'travel_plan.json';
-
-  //   const linkElement = document.createElement('a');
-  //   linkElement.setAttribute('href', dataUri);
-  //   linkElement.setAttribute('download', exportFileDefaultName);
-  //   linkElement.click();
-  // };
   // API 호출 함수
   const savePlanToDatabase = async () => {
+    if (!session) {
+      // 사용자가 로그인되지 않았다면 여행 계획을 로컬 스토리지에 저장하고 로그인 페이지로 리다이렉트
+      localStorage.setItem('travelPlan', JSON.stringify(days)); // 계획을 로컬 스토리지에 저장
+      alert('여행 계획을 저장하려면 로그인이 필요합니다.');
+      router.push('/social_login');
+      return;
+    }
+
     try {
       const response = await fetch('/api/save-plan', {
         method: 'POST',
@@ -196,9 +117,10 @@ export default function Planner() {
         },
         body: JSON.stringify({ days }), // 여행 계획 데이터를 API로 전송
       });
-  
+
       if (response.ok) {
         alert('여행 계획이 성공적으로 저장되었습니다!');
+        localStorage.removeItem('travelPlan'); // 저장이 완료되면 로컬 스토리지에서 임시 데이터를 삭제
       } else {
         alert('저장 중 오류가 발생했습니다.');
       }
@@ -207,7 +129,6 @@ export default function Planner() {
       alert('서버와 연결하는 중 오류가 발생했습니다.');
     }
   };
-  
   const saveAsFile = () => {
     const dataStr = JSON.stringify(days);
     const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
@@ -219,7 +140,7 @@ export default function Planner() {
     linkElement.click();
   };
   
-  const loadPlan = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const loadfIle = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -236,6 +157,28 @@ export default function Planner() {
         }
       };
       reader.readAsText(file);
+    }
+  };
+
+  const loadPlan = async () => {
+    try {
+      const response = await fetch('/api/load-plan', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (response.ok) {
+        const loadedPlan = await response.json();
+        setDays(loadedPlan.days); // 가져온 여행 계획을 days 상태에 설정
+        alert('여행 계획을 성공적으로 불러왔습니다!');
+      } else {
+        alert('여행 계획을 불러오는 중 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('불러오기 오류:', error);
+      alert('서버와 연결하는 중 오류가 발생했습니다.');
     }
   };
 
@@ -274,7 +217,8 @@ export default function Planner() {
           <MapComponent
             days={days}
             onSavePlan={savePlanToDatabase}
-            onLoadPlan={() => fileInputRef.current?.click()}
+            onLoadFile={() => fileInputRef.current?.click()}
+            onLoadPlan={loadPlan}
             onSaveFile={saveAsFile}
             setPlace={handlePlaceChange} // Click된 주소를 전달할 함수
           />  
@@ -360,7 +304,7 @@ export default function Planner() {
       <input
       type="file"
       ref={fileInputRef}
-      onChange={loadPlan}
+      onChange={loadfIle}
       style={{ display: 'none' }}
       accept=".json"
     />
