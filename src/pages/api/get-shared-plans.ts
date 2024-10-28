@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const total = await TravelPlan.countDocuments(query);
 
-    // select 문에 필요한 모든 필드를 명시적으로 포함
+    // 명시적으로 numberOfPeople 필드 포함
     const plans = await TravelPlan.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -44,14 +44,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .select('title days creator createdAt likes likedBy destination numberOfPeople')
       .lean();
 
-    const plansWithLikeStatus = plans.map(plan => ({
-      ...plan,
-      isLiked: userId ? (plan.likedBy || []).includes(userId) : false,
-      destination: plan.destination || '여행지 미정',  // 빈 문자열 대신 기본값 설정
-      numberOfPeople: plan.numberOfPeople || 1,
-      likes: plan.likes || 0,
-      likedBy: undefined // 클라이언트에 likedBy 배열 노출 방지
-    }));
+    console.log('Found plans:', plans); // 디버깅용 로그
+
+    const plansWithLikeStatus = plans.map(plan => {
+      console.log('Plan numberOfPeople:', plan.numberOfPeople); // 디버깅용 로그
+      
+      return {
+        ...plan,
+        isLiked: userId ? (plan.likedBy || []).includes(userId) : false,
+        numberOfPeople: plan.numberOfPeople || 1, // 명시적으로 기본값 설정
+        destination: plan.destination || '여행지 미정',
+        likes: plan.likes || 0,
+        likedBy: undefined
+      };
+    });
 
     return res.status(200).json({
       plans: plansWithLikeStatus,

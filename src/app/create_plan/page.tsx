@@ -20,27 +20,28 @@ const SharePlanModal = ({ isOpen, onClose, onShare }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onShare({ 
+    onShare({
       title,
-      numberOfPeople,
-      destination 
+      numberOfPeople: Number(numberOfPeople),
+      destination
     });
     
-    // 초기화
+    // 폼 초기화
     setTitle("");
     setNumberOfPeople(1);
     setDestination("");
     onClose();
   };
 
+  // isOpen이 false면 null 반환
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-container" onClick={e => e.stopPropagation()}>
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900">여행 계획 공유하기</h2>
-          <p className="text-sm text-gray-500 mt-1">여행 계획의 상세 정보를 입력해주세요</p>
+          <p className="text-sm text-gray-500 mt-1">여행 계획의 정보를 입력해주세요</p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -59,7 +60,7 @@ const SharePlanModal = ({ isOpen, onClose, onShare }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              여행 장소
+              여행지
             </label>
             <Input
               value={destination}
@@ -111,26 +112,37 @@ const SharePlanModal = ({ isOpen, onClose, onShare }) => {
 
 const SavePlanModal = ({ isOpen, onClose, onSave }) => {
   const [title, setTitle] = useState("");
+  const [numberOfPeople, setNumberOfPeople] = useState(1);
+  const [destination, setDestination] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // title만 전달하도록 수정
     onSave(title);
+    
     setTitle("");
+    setNumberOfPeople(1);
+    setDestination("");
     onClose();
   };
 
+  // isOpen이 false면 null 반환하여 모달을 렌더링하지 않음
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-container" onClick={e => e.stopPropagation()}>
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900">여행 계획 저장</h2>
-          <p className="text-sm text-gray-500 mt-1">저장할 계획의 이름을 입력하세요</p>
+          <p className="text-sm text-gray-500 mt-1">여행 계획의 정보를 입력해주세요</p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              계획 이름
+            </label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -138,6 +150,37 @@ const SavePlanModal = ({ isOpen, onClose, onSave }) => {
               className="w-full"
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              여행지
+            </label>
+            <Input
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              placeholder="예: 파리, 프랑스"
+              className="w-full"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              여행 인원
+            </label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min="1"
+                max="100"
+                value={numberOfPeople}
+                onChange={(e) => setNumberOfPeople(Number(e.target.value))}
+                className="w-32"
+                required
+              />
+              <span className="text-sm text-gray-500">명</span>
+            </div>
           </div>
           
           <div className="flex justify-end gap-3">
@@ -160,7 +203,6 @@ const SavePlanModal = ({ isOpen, onClose, onSave }) => {
     </div>
   );
 };
-
 // 모달 컴포넌트 정의
 const PlanSelectionModal = ({ isOpen, plans, onSelect, onClose, onUpdate, onRefresh }) => {
   const [editingPlan, setEditingPlan] = useState(null);
@@ -339,7 +381,7 @@ export default function Planner() {
   const [savedPlans, setSavedPlans] = useState<any[]>([]);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const savedDays = localStorage.getItem('travelPlan');
@@ -425,7 +467,7 @@ export default function Planner() {
       }))
     }));
   };
-  const sharePlanToDatabase = async ({ title, destination, numberOfPeople }) => {
+  const sharePlanToDatabase = async ({ title, numberOfPeople, destination }) => {
     if (!session) {
       alert('여행 계획을 공유하려면 로그인이 필요합니다.');
       router.push('/login');
@@ -433,8 +475,6 @@ export default function Planner() {
     }
   
     try {
-      console.log('Sharing plan with:', { title, destination, numberOfPeople }); // 디버깅용 로그
-  
       const sanitizedDays = days.map(day => ({
         title: day.title,
         activities: day.activities.map(activity => ({
@@ -452,9 +492,9 @@ export default function Planner() {
         },
         body: JSON.stringify({
           days: sanitizedDays,
-          title,
-          destination,
-          numberOfPeople: parseInt(numberOfPeople) || 1,
+          title,  // 문자열
+          numberOfPeople: Number(numberOfPeople),  // 숫자로 변환
+          destination,  // 문자열
           planId: currentPlanId
         }),
       });
@@ -473,6 +513,7 @@ export default function Planner() {
       alert(error instanceof Error ? error.message : '공유 중 오류가 발생했습니다.');
     }
   };
+
   const savePlanToDatabase = async (title: string) => {
     if (!session) {
       alert('여행 계획을 저장하려면 로그인이 필요합니다.');
@@ -481,7 +522,6 @@ export default function Planner() {
     }
   
     try {
-      // 모든 필드가 포함된 완전한 데이터 구조 생성
       const sanitizedDays = days.map(day => ({
         title: day.title,
         activities: day.activities.map(activity => ({
@@ -492,17 +532,21 @@ export default function Planner() {
         }))
       }));
   
-      // 현재 플랜의 상태 저장
+      // 기본값을 포함한 요청 데이터 생성
+      const planData = {
+        days: sanitizedDays,
+        title: title,
+        numberOfPeople: 1,  // 기본값 설정
+        destination: '',    // 기본값 설정
+        planId: currentPlanId || undefined  // planId가 null이면 undefined로 설정
+      };
+  
       const response = await fetch('/api/save-plan', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          days: sanitizedDays,
-          title,
-          planId: currentPlanId
-        }),
+        body: JSON.stringify(planData),
       });
   
       if (!response.ok) {
@@ -513,54 +557,56 @@ export default function Planner() {
       const data = await response.json();
       setCurrentPlanId(data.planId);
       
-      // 성공 메시지 표시 및 플랜 목록 새로고침
       alert(data.message || '여행 계획이 성공적으로 저장되었습니다!');
-      await loadPlan(); // 플랜 목록 새로고침
+      await loadPlan();
   
     } catch (error) {
       console.error('저장 중 오류:', error);
       alert(error instanceof Error ? error.message : '저장 중 오류가 발생했습니다.');
     }
   };
-  
   // MapComponent에 전달할 함수 수정
   const handleSavePlan = () => {
     setIsSaveModalOpen(true);
   };
-  const updatePlan = async (planId, newTitle) => {
+  const updatePlan = async (planId: string, newTitle: string) => {
     if (!session) {
       alert('여행 계획을 수정하려면 로그인이 필요합니다.');
       router.push('/social_login');
       return;
     }
-
+  
     try {
       const sanitizedDays = sanitizeDays(days);
+      const updateData = {
+        planId,
+        title: newTitle,
+        days: sanitizedDays,
+        numberOfPeople: 1,  // 기본값 설정
+        destination: ''     // 기본값 설정
+      };
+  
       const response = await fetch('/api/save-plan', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          planId,
-          title: newTitle,
-          days: sanitizedDays
-        }),
+        body: JSON.stringify(updateData),
       });
-
+  
       if (response.ok) {
-        // 성공적으로 업데이트된 후 플랜 목록 새로고침
         loadPlan();
         alert('여행 계획이 성공적으로 수정되었습니다!');
       } else {
-        alert('수정 중 오류가 발생했습니다.');
+        const errorData = await response.json();
+        throw new Error(errorData.message || '수정 중 오류가 발생했습니다.');
       }
     } catch (error) {
       console.error('수정 중 오류:', error);
-      alert('서버와 연결하는 중 오류가 발생했습니다.');
+      alert(error instanceof Error ? error.message : '서버와 연결하는 중 오류가 발생했습니다.');
     }
   };
- 
+  
 
   const loadPlan = async () => {
     if (!session) {
@@ -672,29 +718,14 @@ export default function Planner() {
         <div className="itinerary-container">
           <div className="itinerary-layout">
           <MapComponent
-  days={days}
-  onSavePlan={handleSavePlan}
-  onLoadFile={() => fileInputRef.current?.click()}
-  onLoadPlan={loadPlan}
-  onSaveFile={saveAsFile}
-  onShare={() => setIsShareModalOpen(true)}
-  setPlace={handlePlaceChange}
-  
-/>
-      <SavePlanModal
-        isOpen={isSaveModalOpen}
-        onClose={() => setIsSaveModalOpen(false)}
-        onSave={savePlanToDatabase}
-      />
-      <PlanSelectionModal
-        isOpen={isModalOpen}
-        plans={savedPlans}
-        onSelect={handlePlanSelect}
-        onClose={() => setIsModalOpen(false)}
-        onUpdate={updatePlan}
-        onRefresh={loadPlan}
-      />
-            <div className="itinerary-content">
+            days={days}
+            onSavePlan={handleSavePlan}
+            onLoadFile={() => fileInputRef.current?.click()}
+            onLoadPlan={loadPlan}
+            onSaveFile={saveAsFile}
+            onShare={() => setIsShareModalOpen(true)}
+            setPlace={handlePlaceChange}
+          />  <div className="itinerary-content">
               <div className="button-container">
                 <Button onClick={addDay} className="add-day-button">Add Day</Button>
               </div>
@@ -779,19 +810,24 @@ export default function Planner() {
         style={{ display: 'none' }}
         accept=".json"
       />
-       <PlanSelectionModal
-  isOpen={isModalOpen}
-  plans={savedPlans}
-  onSelect={handlePlanSelect}
-  onClose={() => setIsModalOpen(false)}
-  onUpdate={updatePlan}
-  onRefresh={loadPlan}  // loadPlan 함수 전달
-/>
-<SharePlanModal
-  isOpen={isShareModalOpen}
-  onClose={() => setIsShareModalOpen(false)}
-  onShare={sharePlanToDatabase}
-/>
+       <SavePlanModal
+      isOpen={isSaveModalOpen}
+      onClose={() => setIsSaveModalOpen(false)}
+      onSave={savePlanToDatabase}
+    />
+    <PlanSelectionModal
+      isOpen={isModalOpen}
+      plans={savedPlans}
+      onSelect={handlePlanSelect}
+      onClose={() => setIsModalOpen(false)}
+      onUpdate={updatePlan}
+      onRefresh={loadPlan}
+    />
+    <SharePlanModal
+      isOpen={isShareModalOpen}
+      onClose={() => setIsShareModalOpen(false)}
+      onShare={sharePlanToDatabase}
+    />
     </div>
   )
 }

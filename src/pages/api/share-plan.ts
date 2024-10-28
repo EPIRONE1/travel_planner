@@ -19,17 +19,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const { days, title, destination, numberOfPeople, planId } = req.body;
+    const { days, title, numberOfPeople, destination, planId } = req.body;
+    
+    // 디버깅을 위한 로그
+    console.log('Received data:', {
+      title,
+      numberOfPeople,
+      destination,
+      planId
+    });
 
     if (!title) {
       return res.status(400).json({ message: '계획 이름을 입력해주세요.' });
     }
-
-    console.log('Received share plan request:', { 
-      title, 
-      destination, 
-      numberOfPeople 
-    }); // 디버깅용 로그
 
     const sharedPlanData = {
       userId: session.user.id,
@@ -45,13 +47,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })),
       isShared: true,
       creator: session.user.name || '익명',
-      destination: destination || '', // 명시적으로 destination 설정
-      numberOfPeople: numberOfPeople || 1,
+      destination: destination || '',
+      numberOfPeople: Number(numberOfPeople) || 1, // 명시적으로 숫자로 변환
       likes: 0,
       views: 0,
       likedBy: [],
       updatedAt: new Date()
     };
+
+    console.log('Saving plan with data:', sharedPlanData); // 디버깅
 
     let plan;
     if (planId) {
@@ -76,13 +80,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       );
     } else {
-      plan = await TravelPlan.create({
-        ...sharedPlanData,
-        createdAt: new Date()
-      });
+      plan = await TravelPlan.create(sharedPlanData);
     }
 
-    console.log('Saved plan:', plan); // 디버깅용 로그
+    console.log('Saved plan:', plan); // 디버깅
 
     return res.status(200).json({
       message: '플랜이 공유되었습니다.',

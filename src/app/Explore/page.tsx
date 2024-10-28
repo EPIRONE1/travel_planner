@@ -20,7 +20,7 @@ interface Plan {
   likes: number;
   isLiked: boolean;
   days: any[];
-  numberOfPeople?: number; // 추가
+  numberOfPeople: number; // number 타입으로 명시
 }
 
 const ExplorePage = () => {
@@ -163,31 +163,28 @@ const ExplorePage = () => {
           <div className="travel-plans-grid">
             {sharedPlans.map(plan => (
               <Card key={plan._id} className="travel-card">
-                <CardHeader>
-                  <CardTitle>{plan.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-  <div className="space-y-2">
-    <div className="travel-detail">
-      <Calendar className="icon" />
-      <span>{plan.days.length}일</span>
-    </div>
-    <div className="travel-detail">
-      <Users className="icon" />
-      <span>{plan.numberOfPeople}명</span>
-    </div>
-    <div className="travel-detail">
-      <Globe className="icon" />
-      <span className="truncate">{plan.destination || '여행지 미정'}</span>
-    </div>
-    <div className="travel-detail">
-      <Users className="icon" />
-      <span>작성자: {plan.creator || '익명'}</span>
-    </div>
-  </div>
-  <div className="mt-4 text-sm text-gray-500">
-    작성일: {new Date(plan.createdAt).toLocaleDateString('ko-KR')}
-  </div>
+              <CardHeader>
+                <CardTitle>{plan.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="travel-detail">
+                    <Calendar className="icon" />
+                    <span>{plan.days.length}일</span>
+                  </div>
+                  <div className="travel-detail">
+                    <Users className="icon" />
+                    <span>{plan.numberOfPeople}명</span> {/* numberOfPeople 직접 사용 */}
+                  </div>
+                  <div className="travel-detail">
+                    <Globe className="icon" />
+                    <span>{plan.destination}</span>
+                  </div>
+                  <div className="travel-detail">
+                    <Users className="icon" />
+                    <span>작성자: {plan.creator}</span>
+                  </div>
+                </div>
 </CardContent>
                 <CardFooter className="justify-between">
                   <Button

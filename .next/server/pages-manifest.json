@@ -3,8 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/api/auth/[...nextauth]": "pages/api/auth/[...nextauth].js",
-  "/api/get-shared-plans": "pages/api/get-shared-plans.js",
-  "/api/load-plan": "pages/api/load-plan.js",
-  "/api/delete-plan": "pages/api/delete-plan.js",
-  "/api/share-plan": "pages/api/share-plan.js"
+  "/api/share-plan": "pages/api/share-plan.js",
+  "/api/get-shared-plans": "pages/api/get-shared-plans.js"
 }
