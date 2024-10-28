@@ -1,14 +1,35 @@
-
-/* Add Day ¹öÆ°À» °¨½Î´Â ÄÁÅ×ÀÌ³Ê¿¡ ¸¶Áø Ãß°¡ */
-.add-day-container {
-  margin-bottom: 20px; /* Add Day ¹öÆ° ¾Æ·¡ ¿©¹é */
+.modal-overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* ¶Ç´Â Add Day ¹öÆ° ÀÚÃ¼¿¡ ¸¶Áø Ãß°¡ */
+.modal-container {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  width: 24rem;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+.add-activity-button{
+  margin: 10px;
+  margin-left: 10px;
+}
+.add-day-container {
+  margin-bottom: 20px;
+}
+
 .add-day-button {
-  margin-top: 10px;/* Add Day ¹öÆ° ¾Æ·¡ ¿©¹é */
-  align-self: flex-end; /* ¹öÆ°À» ¿À¸¥ÂÊÀ¸·Î Á¤·Ä */
-  margin-left: auto; /* ¿ÞÂÊ ¿©¹éÀ» ÀÚµ¿À¸·Î ¼³Á¤ÇÏ¿© ¿À¸¥ÂÊÀ¸·Î ¹Ð±â */
+  margin-top: 10px;
+  align-self: flex-end;
+  margin-left: auto;
 }
 
 .Button {
@@ -28,23 +49,25 @@
 .day-container {
   background-color: white;
   border-radius: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
 .day-container.collapsed {
-  padding: 10px 20px;
+  padding: 12px 25px; 
 }
 
 .day-container.expanded {
-  padding: 20px;
+  padding: 20px 25px; 
 }
 
 .day-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 55px; 
+  padding: 8px 0; 
 }
 
 .day-title {
@@ -52,25 +75,30 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding: 8px 15px; 
 }
 
 .chevron-icon {
-  margin-left: 10px;
+  margin-left: 15px;
+  width: 24px;
+  height: 24px;
 }
 
 .remove-day-button {
-  padding: 0;
+  padding: 8px;
   background: none;
   border: none;
   cursor: pointer;
+  margin-left: 15px;
 }
 
 .trash-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   color: #888;
 }
-
 .trash-icon:hover {
   color: #ff4d4d;
 }
@@ -78,7 +106,7 @@
 .activity-item {
   display: flex;
   flex-direction: column;
-  gap: 2px; /* ÀÔ·Â¶õ »çÀÌÀÇ °£°ÝÀ» 2px·Î ¼³Á¤ */
+  gap: 2px; /* ï¿½Ô·Â¶ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 2pxï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
   background-color: #f9f9f9;
   border-radius: 5px;
   padding: 15px;
@@ -86,11 +114,11 @@
 }
 
 .activity-item > * {
-  margin-bottom: 2px; /* °¢ ¿ä¼Ò ¾Æ·¡¿¡ 2px ¸¶Áø Ãß°¡ */
+  margin-bottom: 2px; /* ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ 2px ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ */
 }
 
 .activity-item > *:last-child {
-  margin-bottom: 0; /* ¸¶Áö¸· ¿ä¼ÒÀÇ ¾Æ·¡ ¸¶Áø Á¦°Å */
+  margin-bottom: 0; /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
 }
 
 .time-input-container {
@@ -112,7 +140,7 @@
   background-color: #fff;
 }
 
-/* ³ª¸ÓÁö ½ºÅ¸ÀÏÀº ±×´ë·Î À¯Áö */
+/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½×´ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
 
 .activity-item input,
 .activity-item select,
@@ -128,7 +156,7 @@
 .activity-item textarea:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 1px var(--primary-color); /* 1px µÎ²²ÀÇ Å×µÎ¸® È¿°ú */
+  box-shadow: 0 0 0 1px var(--primary-color); /* 1px ï¿½Î²ï¿½ï¿½ï¿½ ï¿½×µÎ¸ï¿½ È¿ï¿½ï¿½ */
 }
 
 .time-input-container {
@@ -146,7 +174,7 @@
   width: 70px;
 }
 
-/* ³ª¸ÓÁö ½ºÅ¸ÀÏ À¯Áö */
+/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
 
 .mainpage-header {
   background-color: #3b82f6;
@@ -185,10 +213,10 @@
   cursor: pointer;
 }
 
-/* ±âÁ¸ ½ºÅ¸ÀÏ À¯Áö */
+/* ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
 
 .days-container {
-  margin-top: 20px; /* Day ÄÁÅ×ÀÌ³Êµé À§ÀÇ ¿©¹é */
+  margin-top: 20px; /* Day ï¿½ï¿½ï¿½ï¿½ï¿½Ì³Êµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
 }
 
 .button-container {
@@ -201,10 +229,10 @@
   height: 18px;
 }
 
-/* ±âÁ¸ ½ºÅ¸ÀÏÀ» À¯ÁöÇÏ¸é¼­ ·¹ÀÌ¾Æ¿ô ºñÀ²¸¸ ¼öÁ¤ */
+/* ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸é¼­ ï¿½ï¿½ï¿½Ì¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
 .itinerary-layout {
   display: grid;
-  /* 3:2 ºñÀ²·Î º¯°æ (Áöµµ:ÀÏÁ¤) */
+  /* 3:2 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½ï¿½ï¿½) */
   grid-template-columns: 1.5fr 1fr;
   gap: 20px;
   padding: 20px;
@@ -212,7 +240,7 @@
   margin: 0 auto;
 }
 
-/* Áöµµ ¼½¼Ç ½ºÅ¸ÀÏ ¾÷µ¥ÀÌÆ® */
+/* ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® */
 .map-section {
   position: sticky;
   top: 20px;
@@ -256,7 +284,7 @@
   height: 100%;
 }
 
-/* ¹öÆ° ½ºÅ¸ÀÏ ¾÷µ¥ÀÌÆ® */
+/* ï¿½ï¿½Æ° ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® */
 .save-plan-button {
   display: flex;
   align-items: center;
@@ -305,7 +333,7 @@
   background-color: #f57c00;
 }
 
-/* ¹ÝÀÀÇü ½ºÅ¸ÀÏ */
+/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ */
 @media (max-width: 1200px) {
   .map-section {
     height: 60vh;

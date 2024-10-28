@@ -4,9 +4,9 @@ import { GoogleMap, LoadScript } from '@react-google-maps/api';
 import { useState, useEffect, useRef } from 'react';
 import { Input } from './input';
 import { Button } from './button';
-import { Search, Save, Upload } from 'lucide-react';
+import { Search, Save, Upload, Share2 } from 'lucide-react';
 
-const MapComponent = ({ onSavePlan, onLoadFile,onLoadPlan, onSaveFile, setPlace }) => {
+const MapComponent = ({ onSavePlan, onLoadFile, onLoadPlan, onSaveFile, setPlace, onShare }) => {
   const [center, setCenter] = useState({ lat: 48.8566, lng: 2.3522 });
   const [searchQuery, setSearchQuery] = useState('');
   const [map, setMap] = useState(null);
@@ -127,21 +127,26 @@ const MapComponent = ({ onSavePlan, onLoadFile,onLoadPlan, onSaveFile, setPlace 
         </div>
         <div className="map-controls-buttons">
           <Button onClick={onSavePlan} className="save-plan-button">
-            <Save className="w-4 h-4" />
+            <Save className="w-4 h-4 mr-2" />
             Save Plan
           </Button>
           <Button onClick={onSaveFile} className="save-as-file-button">
-            <Save className="w-4 h-4" />
+            <Save className="w-4 h-4 mr-2" />
             Save as File
           </Button>
           <Button onClick={onLoadPlan} className="load-plan-button">
-            <Upload className="w-4 h-4" />
+            <Upload className="w-4 h-4 mr-2" />
             Load Plan
           </Button>
           <Button onClick={onLoadFile} className="load-file-button">
-            <Upload className="w-4 h-4" />
+            <Upload className="w-4 h-4 mr-2" />
             Load File
           </Button>
+          <Button onClick={onShare} className="action-button">
+          <Share2 className="w-4 h-4 mr-2" />
+          share
+          </Button>
+          
         </div>
       </div>
       <div className="map-container">
@@ -151,7 +156,7 @@ const MapComponent = ({ onSavePlan, onLoadFile,onLoadPlan, onSaveFile, setPlace 
             zoom={13}
             center={center}
             onLoad={onMapLoad}
-            onClick={handleMapClick} // Add click event listener
+            onClick={handleMapClick}
           >
           </GoogleMap>
         </LoadScript>

@@ -132,4 +132,70 @@
   .prev-button, .next-button {
     padding: 5px 15px;
   }
+
+  .travel-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .travel-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .travel-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .travel-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4b5563;
+  }
+
+  .travel-detail .icon {
+    flex-shrink: 0;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: #6b7280;
+  }
+
+  .travel-detail span {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .like-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  .like-button.liked .heart-icon {
+    color: #ef4444;
+    fill: #ef4444;
+    transform: scale(1.1);
+  }
+
+  .likes-count {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .liked .likes-count {
+    color: #ef4444;
+  }
   

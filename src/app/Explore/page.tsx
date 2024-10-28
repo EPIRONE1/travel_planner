@@ -1,43 +1,118 @@
-'use client'
+// src/app/explore/page.tsx
+"use client"
 
-import Link from "next/link"
-import './explore.css';
-import { useState } from 'react'
-import { Input } from "./ui/input"
-import { Button } from "./ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
-import { Avatar, AvatarFallback } from "./ui/avatar"
-import { Calendar, Globe, Users, Heart } from "lucide-react"
+import React, { useState, useEffect } from 'react';
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import { Calendar, Globe, Users, Heart } from "lucide-react";
+import "./explore.css"
 
-const initialTravelPlans = [
-  { id: 1, title: "도쿄 3일 여행", destination: "일본", duration: "3일", creator: "김여행", likes: 120 },
-  { id: 2, title: "파리 로맨틱 주말", destination: "프랑스", duration: "2일", creator: "이파리", likes: 89 },
-  { id: 3, title: "뉴욕 문화 탐방", destination: "미국", duration: "5일", creator: "박뉴욕", likes: 156 },
-  { id: 4, title: "제주도 힐링 여행", destination: "한국", duration: "4일", creator: "최제주", likes: 201 },
-  { id: 5, title: "방콕 맛집 투어", destination: "태국", duration: "3일", creator: "정방콕", likes: 95 },
-  { id: 6, title: "시드니 오페라하우스 투어", destination: "호주", duration: "1일", creator: "호주매니아", likes: 78 },
-]
+interface Plan {
+  _id: string;
+  title: string;
+  destination?: string;
+  creator: string;
+  createdAt: string;
+  likes: number;
+  isLiked: boolean;
+  days: any[];
+  numberOfPeople?: number; // 추가
+}
 
-export default function ExplorePage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [travelPlans, setTravelPlans] = useState(initialTravelPlans)
-  const [likedPlans, setLikedPlans] = useState<number[]>([])
+const ExplorePage = () => {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sharedPlans, setSharedPlans] = useState<Plan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const plansPerPage = 6;
 
-  const filteredPlans = travelPlans.filter(plan => 
-    plan.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    plan.destination.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const fetchSharedPlans = async () => {
+    try {
+      setIsLoading(true);
+      const queryParams = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: plansPerPage.toString(),
+        ...(searchTerm && { search: searchTerm })
+      });
 
-  const handleLike = (id: number) => {
-    setTravelPlans(plans =>
-      plans.map(plan =>
-        plan.id === id ? { ...plan, likes: plan.likes + (likedPlans.includes(id) ? -1 : 1) } : plan
-      )
-    )
-    setLikedPlans(liked =>
-      liked.includes(id) ? liked.filter(planId => planId !== id) : [...liked, id]
-    )
-  }
+      const response = await fetch(`/api/get-shared-plans?${queryParams}`, {
+        headers: {
+          'Cache-Control': 'no-cache' // 캐시 비활성화
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch shared plans');
+      }
+      
+      const data = await response.json();
+      setSharedPlans(data.plans);
+      setTotalPages(data.pagination.pages);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+      setError(error instanceof Error ? error.message : '플랜을 불러오는데 실패했습니다.');
+      setIsLoading(false);
+    }
+  };
+
+  const handleLike = async (planId: string) => {
+    if (!session) {
+      alert('좋아요를 하려면 로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/like-plan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ planId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('좋아요 처리에 실패했습니다.');
+      }
+
+      const data = await response.json();
+
+      // 좋아요 상태 즉시 업데이트
+      setSharedPlans(prevPlans =>
+        prevPlans.map(plan =>
+          plan._id === planId
+            ? {
+                ...plan,
+                likes: data.likes,
+                isLiked: data.liked
+              }
+            : plan
+        )
+      );
+
+    } catch (error) {
+      console.error('Error liking plan:', error);
+      alert('좋아요 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 페이지 로드, 검색어 변경, 페이지 변경 시 플랜 목록 갱신
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      fetchSharedPlans();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm, currentPage]);
 
   return (
     <div className="explore-container">
@@ -55,7 +130,7 @@ export default function ExplorePage() {
                 </Link>
               </li>
               <li>
-                <Link href="#" prefetch={false} className="mainpage-link">
+                <Link href="Explore" prefetch={false} className="mainpage-link">
                   Explore
                 </Link>
               </li>
@@ -80,55 +155,96 @@ export default function ExplorePage() {
           />
         </div>
 
-        <div className="travel-plans-grid">
-          {filteredPlans.map(plan => (
-            <Card key={plan.id} className="travel-card">
-              <CardHeader>
-                <CardTitle>{plan.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="travel-detail">
-                  <Globe className="icon" />
-                  <span>{plan.destination}</span>
-                </div>
-                <div className="travel-detail">
-                  <Calendar className="icon" />
-                  <span>{plan.duration}</span>
-                </div>
-                <div className="travel-detail">
-                  <Avatar className="avatar">
-                    <AvatarFallback>{plan.creator[0]}</AvatarFallback>
-                  </Avatar>
-                  <span>{plan.creator}</span>
-                </div>
-              </CardContent>
-              <CardFooter className="card-footer">
-                <Button variant="outline" className="view-button">자세히 보기</Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`like-button ${likedPlans.includes(plan.id) ? 'liked' : ''}`}
-                  onClick={() => handleLike(plan.id)}
-                  aria-label={`좋아요 ${plan.likes}개`}
-                  aria-pressed={likedPlans.includes(plan.id)}
-                >
-                  <Heart className="heart-icon" />
-                  <span className="likes-count">{plan.likes}</span>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-
-        {filteredPlans.length === 0 && (
-          <p className="no-results">검색 결과가 없습니다.</p>
+        {isLoading ? (
+          <div className="text-center py-8">로딩 중...</div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500">{error}</div>
+        ) : (
+          <div className="travel-plans-grid">
+            {sharedPlans.map(plan => (
+              <Card key={plan._id} className="travel-card">
+                <CardHeader>
+                  <CardTitle>{plan.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+  <div className="space-y-2">
+    <div className="travel-detail">
+      <Calendar className="icon" />
+      <span>{plan.days.length}일</span>
+    </div>
+    <div className="travel-detail">
+      <Users className="icon" />
+      <span>{plan.numberOfPeople}명</span>
+    </div>
+    <div className="travel-detail">
+      <Globe className="icon" />
+      <span className="truncate">{plan.destination || '여행지 미정'}</span>
+    </div>
+    <div className="travel-detail">
+      <Users className="icon" />
+      <span>작성자: {plan.creator || '익명'}</span>
+    </div>
+  </div>
+  <div className="mt-4 text-sm text-gray-500">
+    작성일: {new Date(plan.createdAt).toLocaleDateString('ko-KR')}
+  </div>
+</CardContent>
+                <CardFooter className="justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push(`/plan/${plan._id}`)}
+                    className="flex items-center gap-2"
+                  >
+                    자세히 보기
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={`like-button ${plan.isLiked ? 'liked' : ''}`}
+                    onClick={() => handleLike(plan._id)}
+                  >
+                    <Heart 
+                      className={`heart-icon ${plan.isLiked ? 'text-red-500 fill-red-500' : ''}`}
+                    />
+                    <span className="likes-count">{plan.likes || 0}</span>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
         )}
 
-        <div className="pagination">
-          <Button variant="outline" className="prev-button">이전</Button>
-          <Button variant="outline" className="next-button">다음</Button>
-        </div>
+{sharedPlans.length === 0 && !isLoading && (
+          <p className="text-center py-8 text-gray-500">
+            검색 결과가 없습니다.
+          </p>
+        )}
+
+        {/* 페이지네이션 */}
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-4 mt-6">
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              이전
+            </Button>
+            <span className="flex items-center">
+              {currentPage} / {totalPages}
+            </span>
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              다음
+            </Button>
+          </div>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default ExplorePage;
