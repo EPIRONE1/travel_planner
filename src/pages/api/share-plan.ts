@@ -1,10 +1,9 @@
 // src/pages/api/share-plan.ts
-
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth/[...nextauth]";
-import TravelPlan from "@/models/TravelPlan";
 import { connectDB } from "@/lib/mongoose";
+import TravelPlan from "@/models/TravelPlan";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -12,7 +11,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    // 데이터베이스 연결 확인
+    console.log('Connecting to database...');
     await connectDB();
+    console.log('Database connected successfully');
 
     const session = await getServerSession(req, res, authOptions);
     if (!session?.user) {
@@ -21,77 +23,77 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { days, title, numberOfPeople, destination, planId } = req.body;
     
-    // 디버깅을 위한 로그
-    console.log('Received data:', {
+    console.log('API received data:', {
       title,
       numberOfPeople,
       destination,
       planId
     });
 
-    if (!title) {
-      return res.status(400).json({ message: '계획 이름을 입력해주세요.' });
+    // 명시적 숫자 변환 및 유효성 검사
+    const parsedNumberOfPeople = parseInt(String(numberOfPeople), 10);
+    
+    if (isNaN(parsedNumberOfPeople) || parsedNumberOfPeople < 1) {
+      return res.status(400).json({ 
+        message: '유효하지 않은 여행 인원수입니다.',
+        received: numberOfPeople,
+        parsed: parsedNumberOfPeople
+      });
     }
 
     const sharedPlanData = {
       userId: session.user.id,
       title,
-      days: days.map(day => ({
-        title: day.title,
-        activities: day.activities.map(activity => ({
-          place: activity.place || '',
-          time: activity.time || '',
-          period: activity.period || 'AM',
-          activity: activity.activity || ''
-        }))
-      })),
+      days,
       isShared: true,
       creator: session.user.name || '익명',
       destination: destination || '',
-      numberOfPeople: Number(numberOfPeople) || 1, // 명시적으로 숫자로 변환
+      numberOfPeople: parsedNumberOfPeople,
       likes: 0,
       views: 0,
       likedBy: [],
       updatedAt: new Date()
     };
 
-    console.log('Saving plan with data:', sharedPlanData); // 디버깅
+    console.log('Attempting to save plan with data:', {
+      ...sharedPlanData,
+      numberOfPeople: parsedNumberOfPeople
+    });
 
     let plan;
     if (planId) {
-      const existingPlan = await TravelPlan.findById(planId);
-      
+      console.log('Updating existing plan:', planId);
       plan = await TravelPlan.findOneAndUpdate(
-        { 
-          _id: planId,
-          userId: session.user.id
-        },
+        { _id: planId, userId: session.user.id },
         { 
           $set: {
             ...sharedPlanData,
-            likes: existingPlan?.likes || 0,
-            views: existingPlan?.views || 0,
-            likedBy: existingPlan?.likedBy || []
+            numberOfPeople: parsedNumberOfPeople
           }
         },
         { 
           new: true,
-          upsert: true 
+          runValidators: true
         }
       );
     } else {
+      console.log('Creating new plan');
       plan = await TravelPlan.create(sharedPlanData);
     }
 
-    console.log('Saved plan:', plan); // 디버깅
+    console.log('Plan saved successfully:', {
+      id: plan._id,
+      numberOfPeople: plan.numberOfPeople
+    });
 
     return res.status(200).json({
       message: '플랜이 공유되었습니다.',
-      planId: plan._id
+      planId: plan._id,
+      savedNumberOfPeople: plan.numberOfPeople
     });
 
   } catch (error) {
-    console.error('공유 중 오류:', error);
+    console.error('Share plan error:', error);
     return res.status(500).json({
       message: '공유 중 오류가 발생했습니다.',
       error: error instanceof Error ? error.message : 'Unknown error'

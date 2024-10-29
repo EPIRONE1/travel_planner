@@ -15,25 +15,26 @@ import { Share2 } from 'lucide-react';
 
 const SharePlanModal = ({ isOpen, onClose, onShare }) => {
   const [title, setTitle] = useState("");
-  const [numberOfPeople, setNumberOfPeople] = useState(1);
+  const [numberOfPeople, setNumberOfPeople] = useState("1"); // string type으로 변경
   const [destination, setDestination] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // 숫자 타입으로 변환하여 전달
     onShare({
       title,
-      numberOfPeople: Number(numberOfPeople),
+      numberOfPeople: parseInt(numberOfPeople, 10),
       destination
     });
     
     // 폼 초기화
     setTitle("");
-    setNumberOfPeople(1);
+    setNumberOfPeople("1");
     setDestination("");
     onClose();
   };
 
-  // isOpen이 false면 null 반환
   if (!isOpen) return null;
 
   return (
@@ -81,7 +82,7 @@ const SharePlanModal = ({ isOpen, onClose, onShare }) => {
                 min="1"
                 max="100"
                 value={numberOfPeople}
-                onChange={(e) => setNumberOfPeople(Number(e.target.value))}
+                onChange={(e) => setNumberOfPeople(e.target.value)}
                 className="w-32"
                 required
               />
@@ -475,15 +476,7 @@ export default function Planner() {
     }
   
     try {
-      const sanitizedDays = days.map(day => ({
-        title: day.title,
-        activities: day.activities.map(activity => ({
-          place: activity.place || '',
-          time: activity.time || '',
-          period: activity.period || 'AM',
-          activity: activity.activity || ''
-        }))
-      }));
+      console.log('Sending data:', { title, numberOfPeople, destination }); // 디버깅용 로그
   
       const response = await fetch('/api/share-plan', {
         method: 'POST',
@@ -491,10 +484,10 @@ export default function Planner() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          days: sanitizedDays,
-          title,  // 문자열
-          numberOfPeople: Number(numberOfPeople),  // 숫자로 변환
-          destination,  // 문자열
+          days,
+          title,
+          numberOfPeople: Number(numberOfPeople), // 명시적으로 Number로 변환
+          destination,
           planId: currentPlanId
         }),
       });
@@ -505,6 +498,7 @@ export default function Planner() {
       }
   
       const data = await response.json();
+      console.log('Response data:', data); // 디버깅용 로그
       setCurrentPlanId(data.planId);
       alert('여행 계획이 성공적으로 공유되었습니다!');
   
@@ -513,7 +507,6 @@ export default function Planner() {
       alert(error instanceof Error ? error.message : '공유 중 오류가 발생했습니다.');
     }
   };
-
   const savePlanToDatabase = async (title: string) => {
     if (!session) {
       alert('여행 계획을 저장하려면 로그인이 필요합니다.');

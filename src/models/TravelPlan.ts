@@ -1,4 +1,5 @@
-import { Schema, model, Document, models } from 'mongoose';
+// src/models/TravelPlan.ts
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 interface IActivity {
   place: string;
@@ -18,79 +19,60 @@ export interface ITravelPlan extends Document {
   days: IDay[];
   isShared: boolean;
   creator: string;
+  destination: string;
+  numberOfPeople: number;
+  likes: number;
+  views: number;
+  likedBy: string[];
   createdAt: Date;
   updatedAt: Date;
-  destination?: string;    // 추가: 여행 목적지
-  likes: number;          // 추가: 좋아요 수
-  views: number;          // 추가: 조회수
-  likedBy: string[];     // 추가: 좋아요한 사용자들의 ID
-  numberOfPeople?: number;    // 추가: 여행 인원 수
-  destination?: string;       // 기존 필드 활용
 }
 
-const ActivitySchema = new Schema<IActivity>({
-  place: String,
-  time: String,
-  period: String,
-  activity: String,
-  numberOfPeople: {
-    type: Number,
-    default: 1
-  },
-  destination: {
-    type: String,
-    default: ''
-  }
+const ActivitySchema = new Schema({
+  place: { type: String, default: '' },
+  time: { type: String, default: '' },
+  period: { type: String, default: 'AM' },
+  activity: { type: String, default: '' }
 });
 
-const DaySchema = new Schema<IDay>({
-  title: String,
-  activities: [ActivitySchema],
+const DaySchema = new Schema({
+  title: { type: String, required: true },
+  activities: [ActivitySchema]
 });
 
 const TravelPlanSchema = new Schema<ITravelPlan>({
-  userId: String,
-  title: {
-    type: String,
-    default: function() {
-      return `여행 계획 ${Date.now()}`;
+  userId: { type: String, required: true },
+  title: { type: String, required: true },
+  days: [DaySchema],
+  isShared: { type: Boolean, default: false },
+  creator: { type: String, required: true },
+  destination: { type: String, default: '' },
+  numberOfPeople: { 
+    type: Number, 
+    required: true,
+    min: 1,
+    validate: {
+      validator: Number.isInteger,
+      message: '여행 인원은 정수여야 합니다.'
     }
   },
-  days: [DaySchema],
-  isShared: {
-    type: Boolean,
-    default: false
-  },
-  creator: String,
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  },
-  destination: {          // 추가
-    type: String,
-    default: ''
-  },
-  likes: {               // 추가
-    type: Number,
-    default: 0
-  },
-  views: {               // 추가
-    type: Number,
-    default: 0
-  },
-  likedBy: {            // 추가
-    type: [String],
-    default: []
-  }
+  likes: { type: Number, default: 0 },
+  views: { type: Number, default: 0 },
+  likedBy: [{ type: String }],
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
+// 업데이트 시 updatedAt 자동 갱신
 TravelPlanSchema.pre('save', function(next) {
   this.updatedAt = new Date();
   next();
 });
 
-export default models.TravelPlan || model<ITravelPlan>('TravelPlan', TravelPlanSchema);
+TravelPlanSchema.pre('findOneAndUpdate', function(next) {
+  this.set({ updatedAt: new Date() });
+  next();
+});
+
+// 모델이 이미 컴파일되었는지 확인하고, 없는 경우에만 새로 생성
+export default mongoose.models.TravelPlan || mongoose.model<ITravelPlan>('TravelPlan', TravelPlanSchema);
