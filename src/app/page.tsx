@@ -5,18 +5,17 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import  Header from '@/components/ui/Header';
-import { MapPin, Calendar, Compass, Users } from 'lucide-react';
+import Header from '@/components/ui/Header';
+import { MapPin, Calendar, Compass, Users, ArrowRight } from 'lucide-react';
 
 const MainPage = () => {
   const router = useRouter();
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Hero Section */}
       <Header />
 
-      {/* Hero Content */}
+      {/* Hero Section - Enhanced CTA */}
       <section className="relative bg-gradient-to-b from-blue-50 to-white py-20 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
@@ -26,22 +25,25 @@ const MainPage = () => {
             당신의 완벽한 여행을 위한 스마트한 플래너. 
             목적지 선택부터 일정 관리까지, 모든 여행 계획을 한 곳에서 관리하세요.
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 flex-col sm:flex-row items-center">
             <Button 
               onClick={() => router.push('/create_plan')}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg transform hover:scale-105 transition-transform duration-200 shadow-lg hover:shadow-xl w-64 sm:w-auto flex items-center justify-center gap-2 animate-pulse"
             >
               여행 계획 만들기
+              <ArrowRight className="w-5 h-5" />
             </Button>
             <Button 
               onClick={() => router.push('/Explore')}
               variant="outline"
-              className="px-8 py-6 text-lg"
+              className="px-8 py-6 text-lg border-2 w-64 sm:w-auto"
             >
               다른 계획 둘러보기
             </Button>
           </div>
         </div>
+        {/* Added decorative elements */}
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600 opacity-20"></div>
       </section>
 
       {/* Features Section */}
@@ -49,7 +51,7 @@ const MainPage = () => {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">주요 기능</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card className="p-6">
+            <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
               <CardContent className="space-y-4 pt-6">
                 <MapPin className="w-12 h-12 text-blue-600 mx-auto" />
                 <h3 className="text-xl font-semibold text-center">쉬운 장소 선택</h3>
@@ -59,7 +61,7 @@ const MainPage = () => {
               </CardContent>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
               <CardContent className="space-y-4 pt-6">
                 <Calendar className="w-12 h-12 text-blue-600 mx-auto" />
                 <h3 className="text-xl font-semibold text-center">스마트한 일정 관리</h3>
@@ -69,7 +71,7 @@ const MainPage = () => {
               </CardContent>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
               <CardContent className="space-y-4 pt-6">
                 <Users className="w-12 h-12 text-blue-600 mx-auto" />
                 <h3 className="text-xl font-semibold text-center">계획 공유</h3>
@@ -79,7 +81,7 @@ const MainPage = () => {
               </CardContent>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
               <CardContent className="space-y-4 pt-6">
                 <Compass className="w-12 h-12 text-blue-600 mx-auto" />
                 <h3 className="text-xl font-semibold text-center">여행 탐색</h3>
@@ -92,9 +94,9 @@ const MainPage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-blue-50 py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* CTA Section - Enhanced */}
+      <section className="bg-gradient-to-r from-blue-50 to-blue-100 py-20 px-6 relative overflow-hidden">
+        <div className="max-w-4xl mx-auto text-center relative z-10">
           <h2 className="text-3xl font-bold mb-6">
             지금 바로 여행 계획을 시작하세요
           </h2>
@@ -103,11 +105,15 @@ const MainPage = () => {
           </p>
           <Button 
             onClick={() => router.push('/create_plan')}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-6 text-lg transform hover:scale-105 transition-transform duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto animate-pulse"
           >
             무료로 시작하기
+            <ArrowRight className="w-5 h-5" />
           </Button>
         </div>
+        {/* Added decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-200 rounded-full -mr-32 -mt-32 opacity-20"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-200 rounded-full -ml-32 -mb-32 opacity-20"></div>
       </section>
 
       {/* Footer */}

@@ -1,5 +1,3 @@
-// src/app/create_plan/page.tsx
-
 "use client"
 
 import MapComponent from "./ui/MapComponent"
@@ -7,11 +5,13 @@ import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
+import  Header  from "@/components/ui/Header";
 import { ChevronUp, ChevronDown, Trash2, Save, Upload } from 'lucide-react'
 import './styles/itinerary-planner.css'
 import { useSession, signIn, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Share2 } from 'lucide-react';
+import { Share2 } from 'lucide-react'
+import Head from "next/head"
 
 const SharePlanModal = ({ isOpen, onClose, onShare }) => {
   const [title, setTitle] = useState("");
@@ -679,123 +679,150 @@ export default function Planner() {
 
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="mainpage-header">
-        <div className="mainpage-header-content">
-          <div>
-            <h1 className="mainpage-title">Travel Planner</h1>
-            <p className="mainpage-subtitle">Plan your dream vacation with ease</p>
-          </div>
-          <nav>
-            <ul className="mainpage-nav">
-              <li>
-                <Link href="/" prefetch={false} className="mainpage-link">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="Explore" prefetch={false} className="mainpage-link">
-                  Explore
-                </Link>
-              </li>
-              <li>
-                <Link href="create_plan" prefetch={false} className="mainpage-link">
-                  Create
-                </Link>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </header>
-      <main className="flex-1">
-        <div className="itinerary-container">
-          <div className="itinerary-layout">
-          <MapComponent
-            days={days}
-            onSavePlan={handleSavePlan}
-            onLoadFile={() => fileInputRef.current?.click()}
-            onLoadPlan={loadPlan}
-            onSaveFile={saveAsFile}
-            onShare={() => setIsShareModalOpen(true)}
-            setPlace={handlePlaceChange}
-          />  <div className="itinerary-content">
-              <div className="button-container">
-                <Button onClick={addDay} className="add-day-button">Add Day</Button>
+    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-blue-50 to-white">
+      {/* Compact Header */}
+      <Header />
+
+      {/* Main Content - Fills remaining height */}
+      <main className="flex-1 container mx-auto px-2 pb-2 overflow-hidden">
+        <div className="h-full bg-white shadow-sm">
+          <div className="grid lg:grid-cols-2 h-full">
+            {/* Map Section - 고정 높이 */}
+            <div className="h-full overflow-hidden">
+              <MapComponent
+                days={days}
+                onSavePlan={handleSavePlan}
+                onLoadFile={() => fileInputRef.current?.click()}
+                onLoadPlan={loadPlan}
+                onSaveFile={saveAsFile}
+                onShare={() => setIsShareModalOpen(true)}
+                setPlace={handlePlaceChange}
+              />
+            </div>
+
+            {/* Itinerary Section - 고정 높이와 스크롤 */}
+            <div className="border-l border-gray-200 flex flex-col h-full overflow-hidden">
+              {/* 헤더 영역 - 고정 */}
+              <div className="flex-none px-4 py-3 bg-white border-b border-gray-200">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-lg font-semibold text-gray-900">여행 일정</h2>
+                  <Button 
+                    onClick={addDay}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                    size="sm"
+                  >
+                    일정 추가
+                  </Button>
+                </div>
               </div>
-              <div className="days-container">
-                {days.sort((a, b) => parseInt(a.title.split(' ')[1]) - parseInt(b.title.split(' ')[1])).map((day, dayIndex) => (
-                  <div key={dayIndex} className="day-container ${expandedDayIndex === dayIndex ? 'expanded' : 'collapsed'}">
-                    <div className="day-header">
-                      <h3 className="day-title" onClick={() => toggleDay(dayIndex)}>
-                        {day.title}
-                        {expandedDayIndex === dayIndex ? (
-                          <ChevronUp className="chevron-icon" />
-                        ) : (
-                          <ChevronDown className="chevron-icon" />
-                        )}
-                      </h3>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="remove-day-button"
-                        onClick={() => removeDay(dayIndex)}
+
+              {/* 스크롤 가능한 일정 목록 영역 */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-4 space-y-3">
+                  {days
+                    .sort((a, b) => parseInt(a.title.split(' ')[1]) - parseInt(b.title.split(' ')[1]))
+                    .map((day, dayIndex) => (
+                    <div 
+                      key={dayIndex} 
+                      className="border rounded-lg bg-white shadow-sm"
+                    >
+                      <div 
+                        className="flex justify-between items-center px-3 py-2 cursor-pointer bg-gradient-to-r from-blue-50 to-white"
+                        onClick={() => toggleDay(dayIndex)}
                       >
-                        <Trash2 className="trash-icon" />
-                      </Button>
-                    </div>
-                    {expandedDayIndex === dayIndex && (
-                      <div className="activities-container">
-                        {day.activities.map((activity, activityIndex) => (
-                          <div key={activityIndex} className="activity-item">
-                            <Input
-                              value={activity.place}
-                              onChange={(e) => updateActivity(dayIndex, activityIndex, "place", e.target.value)}
-                              onFocus={() => setFocusedActivityIndex({ dayIndex, activityIndex })}
-                              placeholder="장소"
-                            />
-                            <div className="time-input-container">
-                              <Input
-                                className="time-input"
-                                placeholder="시간 : ex(10:00)"
-                                value={activity.time}
-                                onChange={(e) => updateActivity(dayIndex, activityIndex, "time", e.target.value)}
-                              />
-                              <select
-                                className="period-select"
-                                value={activity.period}
-                                onChange={(e) => updateActivity(dayIndex, activityIndex, "period", e.target.value)}
-                              >
-                                <option value="AM">오전</option>
-                                <option value="PM">오후</option>
-                              </select>
-                            </div>
-                            <Input
-                              placeholder="할 일"
-                              value={activity.activity}
-                              onChange={(e) => updateActivity(dayIndex, activityIndex, "activity", e.target.value)}
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="remove-activity-button"
-                              onClick={() => removeActivity(dayIndex, activityIndex)}
-                            >
-                              <Trash2 className="trash-icon" />
-                            </Button>
-                          </div>
-                        ))}
-                        <Button variant="outline" onClick={() => addActivity(dayIndex)} className="add-activity-button">
-                          Add Activity
+                        <h3 className="font-medium text-gray-900 flex items-center gap-2">
+                          <span className="text-blue-600">{day.title}</span>
+                          {expandedDayIndex === dayIndex ? (
+                            <ChevronUp className="w-4 h-4 text-gray-500" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-gray-500" />
+                          )}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeDay(dayIndex);
+                          }}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {expandedDayIndex === dayIndex && (
+                        <div className="p-3 space-y-2">
+                          {day.activities.map((activity, activityIndex) => (
+                            <div 
+                              key={activityIndex} 
+                              className="bg-gray-50 rounded p-3 space-y-2 hover:bg-gray-100 transition-colors"
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                                <Input
+                                  value={activity.place}
+                                  onChange={(e) => updateActivity(dayIndex, activityIndex, "place", e.target.value)}
+                                  onFocus={() => setFocusedActivityIndex({ dayIndex, activityIndex })}
+                                  placeholder="장소"
+                                  className="flex-1 border-gray-300 focus:border-blue-500 bg-white"
+                                />
+                              </div>
+                              
+                              <div className="flex gap-2 pl-4">
+                                <Input
+                                  className="flex-1 bg-white"
+                                  placeholder="시간 (예: 10:00)"
+                                  value={activity.time}
+                                  onChange={(e) => updateActivity(dayIndex, activityIndex, "time", e.target.value)}
+                                />
+                                <select
+                                  className="px-2 py-1 border rounded text-gray-700 bg-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  value={activity.period}
+                                  onChange={(e) => updateActivity(dayIndex, activityIndex, "period", e.target.value)}
+                                >
+                                  <option value="AM">오전</option>
+                                  <option value="PM">오후</option>
+                                </select>
+                              </div>
+
+                              <div className="flex gap-2 pl-4">
+                                <Input
+                                  placeholder="활동 내용"
+                                  value={activity.activity}
+                                  onChange={(e) => updateActivity(dayIndex, activityIndex, "activity", e.target.value)}
+                                  className="flex-1 bg-white"
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeActivity(dayIndex, activityIndex)}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                          <Button 
+                            variant="outline" 
+                            onClick={() => addActivity(dayIndex)}
+                            className="w-full mt-2 text-blue-600 hover:text-blue-700 border-dashed text-sm"
+                            size="sm"
+                          >
+                            + 새로운 일정 추가
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </main>
+
       <input
         type="file"
         ref={fileInputRef}
@@ -803,24 +830,24 @@ export default function Planner() {
         style={{ display: 'none' }}
         accept=".json"
       />
-       <SavePlanModal
-      isOpen={isSaveModalOpen}
-      onClose={() => setIsSaveModalOpen(false)}
-      onSave={savePlanToDatabase}
-    />
-    <PlanSelectionModal
-      isOpen={isModalOpen}
-      plans={savedPlans}
-      onSelect={handlePlanSelect}
-      onClose={() => setIsModalOpen(false)}
-      onUpdate={updatePlan}
-      onRefresh={loadPlan}
-    />
-    <SharePlanModal
-      isOpen={isShareModalOpen}
-      onClose={() => setIsShareModalOpen(false)}
-      onShare={sharePlanToDatabase}
-    />
+      <SavePlanModal
+        isOpen={isSaveModalOpen}
+        onClose={() => setIsSaveModalOpen(false)}
+        onSave={savePlanToDatabase}
+      />
+      <PlanSelectionModal
+        isOpen={isModalOpen}
+        plans={savedPlans}
+        onSelect={handlePlanSelect}
+        onClose={() => setIsModalOpen(false)}
+        onUpdate={updatePlan}
+        onRefresh={loadPlan}
+      />
+      <SharePlanModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        onShare={sharePlanToDatabase}
+      />
     </div>
   )
 }
