@@ -1,14 +1,7 @@
 {
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
-  "/api/delete-plan": "pages/api/delete-plan.js",
-  "/api/get-plan-detail": "pages/api/get-plan-detail.js",
-  "/api/get-shared-plans": "pages/api/get-shared-plans.js",
-  "/api/like-plan": "pages/api/like-plan.js",
-  "/api/list-plan": "pages/api/list-plan.js",
-  "/api/save-plan": "pages/api/save-plan.js",
-  "/api/share-plan": "pages/api/share-plan.js",
+  "/_document": "pages/_document.js",
   "/api/auth/[...nextauth]": "pages/api/auth/[...nextauth].js",
-  "/api/load-plan": "pages/api/load-plan.js",
-  "/_document": "pages/_document.js"
+  "/api/share-plan": "pages/api/share-plan.js"
 }

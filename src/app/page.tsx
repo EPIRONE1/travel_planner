@@ -64,7 +64,7 @@ const MainPage = () => {
             <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
               <CardContent className="space-y-4 pt-6">
                 <Calendar className="w-12 h-12 text-blue-600 mx-auto" />
-                <h3 className="text-xl font-semibold text-center">스마트한 일정 관리</h3>
+                <h3 className="text-xl font-semibold text-center">쉬운 일정 관리</h3>
                 <p className="text-gray-600 text-center">
                   간편하게 일정을 조정하고 관리하세요
                 </p>

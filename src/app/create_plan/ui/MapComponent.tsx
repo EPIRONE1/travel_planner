@@ -108,7 +108,7 @@ const MapComponent = ({ onSavePlan, onLoadFile, onLoadPlan, onSaveFile, setPlace
         <div className="flex gap-2">
           <Input
             type="text"
-            placeholder="Search location..."
+            placeholder="장소 검색..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -116,7 +116,7 @@ const MapComponent = ({ onSavePlan, onLoadFile, onLoadPlan, onSaveFile, setPlace
           />
           <Button onClick={handleSearch}>
             <Search className="w-4 h-4 mr-2" />
-            Search
+            검색
           </Button>
         </div>
         
@@ -124,23 +124,23 @@ const MapComponent = ({ onSavePlan, onLoadFile, onLoadPlan, onSaveFile, setPlace
         <div className="flex flex-wrap gap-2">
           <Button onClick={onSavePlan} variant="outline" size="sm">
             <Save className="w-4 h-4 mr-2" />
-            Save Plan
+            저장
           </Button>
           <Button onClick={onSaveFile} variant="outline" size="sm">
             <Save className="w-4 h-4 mr-2" />
-            Save as File
+            파일로 저장
           </Button>
           <Button onClick={onLoadPlan} variant="outline" size="sm">
             <Upload className="w-4 h-4 mr-2" />
-            Load Plan
+            불러오기
           </Button>
           <Button onClick={onLoadFile} variant="outline" size="sm">
             <Upload className="w-4 h-4 mr-2" />
-            Load File
+            파일 불러오기
           </Button>
           <Button onClick={onShare} variant="outline" size="sm">
             <Share2 className="w-4 h-4 mr-2" />
-            Share
+            공유
           </Button>
         </div>
       </div>

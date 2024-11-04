@@ -390,7 +390,7 @@ export default function Planner() {
       setDays(JSON.parse(savedDays));
     } else {
       setDays([{
-        title: "Day 1",
+        title: "1 일차",
         activities: [
           { place: "", time: "", period: "AM", activity: "" }
         ],
@@ -407,7 +407,7 @@ export default function Planner() {
       newDayNumber = days.length + 1;
     }
     const newDay = {
-      title: `Day ${newDayNumber}`,
+      title: `${newDayNumber} 일차`,
       activities: [],
     };
     const newDays = [...days];
@@ -471,7 +471,7 @@ export default function Planner() {
   const sharePlanToDatabase = async ({ title, numberOfPeople, destination }) => {
     if (!session) {
       alert('여행 계획을 공유하려면 로그인이 필요합니다.');
-      router.push('/login');
+      router.push('/social_login');
       return;
     }
   
@@ -510,7 +510,7 @@ export default function Planner() {
   const savePlanToDatabase = async (title: string) => {
     if (!session) {
       alert('여행 계획을 저장하려면 로그인이 필요합니다.');
-      router.push('/login');
+      router.push('social_login');
       return;
     }
   
@@ -604,7 +604,7 @@ export default function Planner() {
   const loadPlan = async () => {
     if (!session) {
       alert('여행 계획을 불러오려면 로그인이 필요합니다.');
-      router.push('/login');
+      router.push('/social_login');
       return;
     }
   
