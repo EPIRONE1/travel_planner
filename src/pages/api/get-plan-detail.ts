@@ -1,9 +1,38 @@
-// src/pages/api/get-plan-detail.ts
+//get-plan-detail.ts
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth/[...nextauth]";
 import TravelPlan from "@/models/TravelPlan";
 import { connectDB } from "@/lib/mongoose";
+
+// Define interfaces for type safety
+interface SessionUser {
+  id?: string;
+  name?: string;
+  email?: string;
+  image?: string;
+}
+
+interface Session {
+  user?: SessionUser;
+  expires: string;
+}
+
+interface TravelPlanDocument {
+  _id: string;
+  userId: string;
+  title: string;
+  days: any[];
+  creator: string;
+  createdAt: Date;
+  likes: number;
+  views: number;
+  destination: string;
+  numberOfPeople: number;
+  likedBy: string[];
+  isShared?: boolean;
+}
 
 // 세션별 조회 기록을 저장할 Map
 const viewedPlans = new Map<string, Set<string>>();
@@ -26,13 +55,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: '플랜 ID가 필요합니다.' });
     }
 
-    const session = await getServerSession(req, res, authOptions);
+    const session = await getServerSession(req, res, authOptions) as Session | null;
     const userId = session?.user?.id || 'anonymous';
 
     // 메인 플랜 조회
     const mainPlan = await TravelPlan.findById(planId)
-      .select('userId title days creator createdAt likes views destination numberOfPeople likedBy')
-      .lean();
+      .select('_id userId title days creator createdAt likes views destination numberOfPeople likedBy')
+      .lean() as TravelPlanDocument;
 
     if (!mainPlan) {
       return res.status(404).json({ message: '플랜을 찾을 수 없습니다.' });
@@ -53,10 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       viewedSet.add(sessionKey);
       viewedPlans.set(planId, viewedSet);
       
-      console.log(`View count increased for plan ${planId} by user ${userId}`);
-    } else {
-      console.log(`Skip view count for plan ${planId} - already viewed by ${userId}`);
-    }
+     }
 
     // 같은 사용자의 다른 플랜들 조회
     const userOtherPlans = await TravelPlan.find({
@@ -65,7 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       isShared: true
     })
     .select('title days creator createdAt likes views destination numberOfPeople likedBy')
-    .lean();
+    .lean() as TravelPlanDocument[];
 
     // 다른 사용자들의 플랜 조회
     const otherPlans = await TravelPlan.find({
@@ -74,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
     .select('title days creator createdAt likes views destination numberOfPeople likedBy')
     .limit(5)
-    .lean();
+    .lean() as TravelPlanDocument[];
 
     // 좋아요 상태 확인
     const isLiked = userId ? mainPlan.likedBy?.includes(userId) : false;

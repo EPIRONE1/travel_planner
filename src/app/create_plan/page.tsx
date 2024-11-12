@@ -1,24 +1,42 @@
 "use client"
 
+interface Activity {
+  place: string;
+  time: string;
+  period: string;
+  activity: string;
+}
+
+interface Day {
+  title: string;
+  activities: Activity[];
+}
+
 import MapComponent from "./ui/MapComponent"
-import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import  Header  from "@/components/ui/Header";
 import { ChevronUp, ChevronDown, Trash2, Save, Upload } from 'lucide-react'
 import './styles/itinerary-planner.css'
 import { useSession, signIn, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Share2 } from 'lucide-react'
-import Head from "next/head"
 
-const SharePlanModal = ({ isOpen, onClose, onShare }) => {
+
+const SharePlanModal = ({ 
+  isOpen,
+  onClose,
+  onShare 
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onShare: (data: { title: string; numberOfPeople: number; destination: string }) => void;
+}) => {
   const [title, setTitle] = useState("");
   const [numberOfPeople, setNumberOfPeople] = useState("1"); // string type으로 변경
   const [destination, setDestination] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     // 숫자 타입으로 변환하여 전달
@@ -111,12 +129,20 @@ const SharePlanModal = ({ isOpen, onClose, onShare }) => {
   );
 };
 
-const SavePlanModal = ({ isOpen, onClose, onSave }) => {
+const SavePlanModal = ({ 
+  isOpen,
+  onClose,
+  onSave 
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (title: string) => void;
+}) => {
   const [title, setTitle] = useState("");
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [destination, setDestination] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     // title만 전달하도록 수정
@@ -204,12 +230,29 @@ const SavePlanModal = ({ isOpen, onClose, onSave }) => {
     </div>
   );
 };
-// 모달 컴포넌트 정의
-const PlanSelectionModal = ({ isOpen, plans, onSelect, onClose, onUpdate, onRefresh }) => {
-  const [editingPlan, setEditingPlan] = useState(null);
-  const [editTitle, setEditTitle] = useState("");
 
-  const handleDelete = async (planId) => {
+// 모달 컴포넌트 정의
+interface Plan {
+  _id: string;
+  title: string;
+  days: Day[];
+  updatedAt: string | Date;
+}
+
+interface PlanSelectionModalProps {
+  isOpen: boolean;
+  plans: Plan[];
+  onSelect: (plan: Plan) => void;
+  onClose: () => void;
+  onUpdate: (id: string, title: string) => Promise<void>;
+  onRefresh: () => void;
+}
+
+const PlanSelectionModal = ({ isOpen, plans, onSelect, onClose, onUpdate, onRefresh }: PlanSelectionModalProps) => {
+  const [editingPlan, setEditingPlan] = useState<any | null>(null);
+  const [editTitle, setEditTitle] = useState<string>("");
+
+  const handleDelete = async (planId: string) => {
     if (!confirm('정말로 이 여행 계획을 삭제하시겠습니까?')) {
       return;
     }
@@ -232,7 +275,7 @@ const PlanSelectionModal = ({ isOpen, plans, onSelect, onClose, onUpdate, onRefr
       alert('서버와 연결하는 중 오류가 발생했습니다.');
     }
   };
-  const handleEdit = (plan) => {
+  const handleEdit = (plan: any) => {
     setEditingPlan(plan);
     setEditTitle(plan.title || "");
   };
@@ -244,7 +287,7 @@ const PlanSelectionModal = ({ isOpen, plans, onSelect, onClose, onUpdate, onRefr
     setEditTitle("");
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     if (!dateString) return '날짜 정보 없음';
     
     try {
@@ -322,7 +365,7 @@ const PlanSelectionModal = ({ isOpen, plans, onSelect, onClose, onUpdate, onRefr
                       {plan.title || `여행 계획 ${plan._id.slice(-4)}`}
                     </div>
                     <div className="text-sm text-gray-500 mt-1">
-                      마지막 수정: {formatDate(plan.updatedAt)}
+                      마지막 수정: {formatDate(plan.updatedAt instanceof Date ? plan.updatedAt.toISOString() : plan.updatedAt)}
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -423,26 +466,26 @@ export default function Planner() {
     }
   };
 
-  const addActivity = (dayIndex) => {
-    const newActivity = { place: "", time: "", period: "AM", activity: "" }
-    const newDays = [...days]
+  const addActivity = (dayIndex: number): void => {
+    const newActivity: Activity = { place: "", time: "", period: "AM", activity: "" }
+    const newDays: Day[] = [...days]
     newDays[dayIndex].activities.push(newActivity)
     setDays(newDays)
   }
 
-  const removeActivity = (dayIndex, activityIndex) => {
+  const removeActivity = (dayIndex: number, activityIndex: number) => {
     const newDays = [...days]
     newDays[dayIndex].activities.splice(activityIndex, 1)
     setDays(newDays)
   }
 
-  const updateActivity = (dayIndex, activityIndex, field, value) => {
+  const updateActivity = (dayIndex: number, activityIndex: number, field: keyof Activity, value: string) => {
     const newDays = [...days];
     newDays[dayIndex].activities[activityIndex][field] = value;
     setDays(newDays);
   };
 
-  const handlePlaceChange = (place) => {
+  const handlePlaceChange = (place: string) => {
     if (focusedActivityIndex !== null) {
       const { dayIndex, activityIndex } = focusedActivityIndex;
       updateActivity(dayIndex, activityIndex, "place", place);
@@ -457,7 +500,7 @@ export default function Planner() {
     }
   };
    // days 데이터를 정제하는 함수
-   const sanitizeDays = (days) => {
+   const sanitizeDays = (days: Day[]) => {
     return days.map(day => ({
       title: day.title,
       activities: day.activities.map(activity => ({
@@ -468,7 +511,7 @@ export default function Planner() {
       }))
     }));
   };
-  const sharePlanToDatabase = async ({ title, numberOfPeople, destination }) => {
+  const sharePlanToDatabase = async ({ title, numberOfPeople, destination }: { title: string; numberOfPeople: number; destination: string }) => {
     if (!session) {
       alert('여행 계획을 공유하려면 로그인이 필요합니다.');
       router.push('/social_login');
@@ -634,7 +677,7 @@ export default function Planner() {
     }
   };
 
-  const handlePlanSelect = (selectedPlan) => {
+  const handlePlanSelect = (selectedPlan: Plan) => {
     try {
       // 필요한 데이터만 추출하여 설정
       const sanitizedDays = sanitizeDays(selectedPlan.days);

@@ -22,16 +22,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { days, title, planId, numberOfPeople, destination } = req.body;
 
     // 데이터 로깅
-    console.log('Received data:', { days, title, planId, numberOfPeople, destination });
-
+    
     // 새로운 문서 생성을 위한 전체 데이터 구조
+    interface DayData {
+      title: string;
+      activities: Array<{ place?: string; time?: string; period?: string; activity?: string; }>;
+    }
+
     const travelPlanData: Partial<ITravelPlan> = {
       userId: session.user.id,
       title: title || `여행 계획 ${Date.now()}`,
-      days: days.map(day => ({
+      days: days.map((day: DayData) => ({
         _id: undefined,
         title: day.title,
-        activities: day.activities.map(activity => ({
+        activities: day.activities.map((activity: { place?: string; time?: string; period?: string; activity?: string; }) => ({
           _id: undefined,
           place: activity.place || '',
           time: activity.time || '',
@@ -50,7 +54,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       updatedAt: new Date()
     };
 
-    console.log('Processed travel plan data:', travelPlanData); // 데이터 로깅
 
     let plan;
     if (planId) {
@@ -88,7 +91,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       plan = await newPlan.save();
     }
 
-    console.log('Saved plan:', plan); // 저장된 데이터 로깅
 
     return res.status(200).json({
       message: planId ? '플랜이 수정되었습니다.' : '플랜이 저장되었습니다.',

@@ -1,21 +1,48 @@
 import { GoogleMap, LoadScript } from '@react-google-maps/api';
 import { useState, useEffect, useRef } from 'react';
-import { Input } from './input';
-import { Button } from './button';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Search, Save, Upload, Share2 } from 'lucide-react';
 
-const MapComponent = ({ onSavePlan, onLoadFile, onLoadPlan, onSaveFile, setPlace, onShare }) => {
+interface Day {
+  title: string;
+  activities: {
+    place: string;
+    time: string;
+    period: string;
+    activity: string;
+  }[];
+}
+
+interface MapComponentProps {
+  days: Day[];
+  onSavePlan: () => void;
+  onLoadFile: () => void;
+  onLoadPlan: () => Promise<void>;
+  onSaveFile: () => void;
+  onShare: () => void;
+  setPlace: (place: string) => void;
+}
+
+const MapComponent = ({ 
+  days, 
+  onSavePlan, 
+  onLoadFile, 
+  onLoadPlan, 
+  onSaveFile, 
+  setPlace, 
+  onShare 
+}: MapComponentProps) => {
   const [center, setCenter] = useState({ lat: 48.8566, lng: 2.3522 });
   const [searchQuery, setSearchQuery] = useState('');
-  const [map, setMap] = useState(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
   
-  // 지도 스타일을 컨테이너에 맞추도록 수정
   const mapStyles = {
-    height: "calc(100% - 120px)", // 컨트롤 패널 높이를 고려하여 조정
+    height: "calc(100% - 120px)",
     width: "100%",
   };
 
-  const getCoordinates = async (place) => {
+  const getCoordinates = async (place: string) => {
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(place)}&key=AIzaSyBosOmwvXAAl2z6xYy-L6D2I0agK3XpvXs`
@@ -31,7 +58,7 @@ const MapComponent = ({ onSavePlan, onLoadFile, onLoadPlan, onSaveFile, setPlace
     }
   };
 
-  const getAddressFromCoordinates = async (lat, lng) => {
+  const getAddressFromCoordinates = async (lat: number, lng: number) => {
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyBosOmwvXAAl2z6xYy-L6D2I0agK3XpvXs`
@@ -66,13 +93,15 @@ const MapComponent = ({ onSavePlan, onLoadFile, onLoadPlan, onSaveFile, setPlace
     }
   }, []);
 
-  const handleMapClick = async (event) => {
-    const { latLng } = event;
-    const lat = latLng.lat();
-    const lng = latLng.lng();
-    const address = await getAddressFromCoordinates(lat, lng);
-    if (address) {
-      setPlace(address);
+  const handleMapClick = async (event: google.maps.MapMouseEvent) => {
+    const latLng = event.latLng;
+    if (latLng) {
+      const lat = latLng.lat();
+      const lng = latLng.lng();
+      const address = await getAddressFromCoordinates(lat, lng);
+      if (address) {
+        setPlace(address);
+      }
     }
   };
 
@@ -80,7 +109,7 @@ const MapComponent = ({ onSavePlan, onLoadFile, onLoadPlan, onSaveFile, setPlace
     if (!searchQuery) return;
     const coordinates = await getCoordinates(searchQuery);
     if (coordinates) {
-      setCenter({ ...coordinates, userSet: true });
+      setCenter({ ...coordinates });
       if (map) {
         map.panTo(coordinates);
         map.setZoom(13);
@@ -90,21 +119,19 @@ const MapComponent = ({ onSavePlan, onLoadFile, onLoadPlan, onSaveFile, setPlace
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
 
-  const onMapLoad = (map) => {
+  const onMapLoad = (map: google.maps.Map) => {
     setMap(map);
   };
 
   return (
     <div className="h-full flex flex-col">
-      {/* 컨트롤 패널 */}
       <div className="p-4 space-y-4 bg-white border-b">
-        {/* 검색 영역 */}
         <div className="flex gap-2">
           <Input
             type="text"
@@ -120,7 +147,6 @@ const MapComponent = ({ onSavePlan, onLoadFile, onLoadPlan, onSaveFile, setPlace
           </Button>
         </div>
         
-        {/* 버튼 그룹 */}
         <div className="flex flex-wrap gap-2">
           <Button onClick={onSavePlan} variant="outline" size="sm">
             <Save className="w-4 h-4 mr-2" />
@@ -145,7 +171,6 @@ const MapComponent = ({ onSavePlan, onLoadFile, onLoadPlan, onSaveFile, setPlace
         </div>
       </div>
 
-      {/* 지도 컨테이너 */}
       <div className="flex-1 relative">
         <LoadScript googleMapsApiKey="AIzaSyBosOmwvXAAl2z6xYy-L6D2I0agK3XpvXs">
           <GoogleMap

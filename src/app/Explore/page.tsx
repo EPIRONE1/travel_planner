@@ -4,9 +4,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Globe, Users, Heart, Search, User, Eye } from "lucide-react";
 import {
   Select,
@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "@/components/ui/select";
 import "./explore.css";
 import Header from "@/components/ui/Header";
 
@@ -112,23 +112,6 @@ const ExplorePage = () => {
     }
   };
 
-  const handlePlanClick = async (planId: string) => {
-    try {
-      // 조회수 증가 API 호출
-      await fetch('/api/increase-view', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ planId }),
-      });
-      
-      router.push(`/plan/${planId}`);
-    } catch (error) {
-      console.error('Error increasing view count:', error);
-      router.push(`/plan/${planId}`);
-    }
-  };
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
@@ -227,7 +210,7 @@ const ExplorePage = () => {
                     <div className="flex justify-between items-center w-full">
                       <Button
                         variant="outline"
-                        onClick={() => handlePlanClick(plan._id)}
+                        onClick={() =>  router.push(`/plan/${plan._id}`)}
                         className="text-sm"
                         size="sm"
                       >
@@ -236,12 +219,16 @@ const ExplorePage = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className={`like-button ${plan.isLiked ? 'liked' : ''}`}
+                        className={`flex items-center gap-2 transition-all duration-200 ${
+                          plan.isLiked ? 'liked' : ''
+                        }`}
                         onClick={() => handleLike(plan._id)}
                       >
-                        <Heart 
-                          className={`heart-icon ${plan.isLiked ? 'text-red-500 fill-red-500' : ''}`}
-                        />
+                        <Heart
+  className={`h-5 w-5 transition-all duration-200`}
+  fill={plan.isLiked ? "#ef4444" : "none"}  // fill 속성 추가
+  color={plan.isLiked ? "#ef4444" : "currentColor"}
+/>
                       </Button>
                     </div>
                   </CardFooter>

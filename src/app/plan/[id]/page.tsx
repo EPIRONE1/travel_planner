@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Heart, Calendar, Users, Globe, Activity, Clock, MapPin, ChevronDown } from 'lucide-react';
+import { Heart, Calendar, Users, Globe, Activity, Clock, MapPin, ChevronDown,Copy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -74,10 +74,40 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
     }
   };
 
+  const handleCopyPlan = async () => {
+    if (!session) {
+      alert('내 계획으로 가져오려면 로그인이 필요합니다.');
+      router.push('/social_login');
+      return;
+    }
+  
+    try {
+      const response = await fetch('/api/copy-plan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ planId: params.id }),
+      });
+  
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+  
+      const data = await response.json();
+      alert('여행 계획을 내 계획으로 가져왔습니다.');
+      router.push('/create_plan'); // 계획 생성 페이지로 이동
+    } catch (error) {
+      console.error('플랜 복사 중 오류:', error);
+      alert(error instanceof Error ? error.message : '플랜을 가져오는 중 오류가 발생했습니다.');
+    }
+  };
+  
   const handleLike = async (planId: string) => {
     if (!session) {
       alert('좋아요를 하려면 로그인이 필요합니다.');
-      router.push('/login');
+      router.push('/social_login');
       return;
     }
 
@@ -110,51 +140,57 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
 
   const { mainPlan, userOtherPlans, otherPlans } = planDetail;
   
-  const PlanCard = ({ plan }: { plan: Plan }) => (
-    <Card className="w-full hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span className="text-lg truncate">{plan.title}</span>
+  const PlanCard = ({ plan }: { plan: Plan }) => {
+    return (
+      <Card className="w-full hover:shadow-lg transition-shadow">
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center">
+            <span className="text-lg truncate">{plan.title}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`like-button ${plan.isLiked ? 'liked' : ''}`}
+              onClick={() => handleLike(plan._id)}
+            >
+              <Heart
+  className={`h-5 w-5 transition-all duration-200`}
+  fill={plan.isLiked ? "#ef4444" : "none"}  // fill 속성 추가
+  color={plan.isLiked ? "#ef4444" : "currentColor"}
+/>
+              <span className="ml-2">{plan.likes}</span>
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>{plan.days.length}일</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span>{plan.numberOfPeople}명</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              <span className="truncate">{plan.destination || '여행지 미정'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              <span>{plan.views} 조회</span>
+            </div>
+          </div>
           <Button
-            variant="ghost"
-            size="icon"
-            className={`like-button ${plan.isLiked ? 'liked' : ''}`}
-            onClick={() => handleLike(plan._id)}
+            variant="outline"
+            className="w-full mt-4"
+            onClick={() => router.push(`/plan/${plan._id}`)}
           >
-            <Heart className={`h-5 w-5 ${plan.isLiked ? 'text-red-500 fill-red-500' : ''}`} />
-            <span className="ml-2">{plan.likes}</span>
+            자세히 보기
           </Button>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>{plan.days.length}일</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span>{plan.numberOfPeople}명</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            <span className="truncate">{plan.destination || '여행지 미정'}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            <span>{plan.views} 조회</span>
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          className="w-full mt-4"
-          onClick={() => router.push(`/plan/${plan._id}`)}
-        >
-          자세히 보기
-        </Button>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
  
 
   const TimelineActivity = ({ activity }: { activity: Activity }) => (
@@ -206,6 +242,42 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
       </AccordionItem>
     </div>
   );
+  const PlanDetailPage = ({ params }: { params: { id: string } }) => {
+    const { data: session } = useSession();
+    const router = useRouter();
+  
+    const handleCopyPlan = async () => {
+      if (!session) {
+        alert('내 계획으로 가져오려면 로그인이 필요합니다.');
+        router.push('/social_login');
+        return;
+      }
+  
+      try {
+        const response = await fetch('/api/copy-plan', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ planId: params.id }),
+        });
+  
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message);
+        }
+  
+        const data = await response.json();
+        alert('여행 계획을 내 계획으로 가져왔습니다.');
+        router.push('/create_plan');
+      } catch (error) {
+        console.error('플랜 복사 중 오류:', error);
+        alert(error instanceof Error ? error.message : '플랜을 가져오는 중 오류가 발생했습니다.');
+      }
+    }
+    };
+  
+    
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -218,40 +290,54 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
 
       {/* 메인 플랜 카드 */}
       <Card className="mb-8">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl font-bold">{mainPlan?.title}</CardTitle>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-2xl font-bold">{mainPlan?.title}</CardTitle>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleCopyPlan}
+              className="flex items-center gap-2"
+            >
+              <Copy className="h-4 w-4" />
+              내 계획으로 가져오기
+            </Button>
             <Button
               variant="ghost"
               size="icon"
               className={`like-button ${mainPlan?.isLiked ? 'liked' : ''}`}
               onClick={() => handleLike(mainPlan?._id)}
             >
-              <Heart className={`h-6 w-6 ${mainPlan?.isLiked ? 'text-red-500 fill-red-500' : ''}`} />
+              <Heart
+                className={`h-5 w-5 transition-all duration-200`}
+                fill={mainPlan.isLiked ? "#ef4444" : "none"}  
+                color={mainPlan.isLiked ? "#ef4444" : "currentColor"}
+              />
               <span className="ml-2">{mainPlan?.likes}</span>
             </Button>
           </div>
-          
-          {/* 플랜 메타 정보 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-            <div className="flex items-center gap-2 text-gray-600">
-              <Calendar className="h-5 w-5" />
-              <span>{mainPlan?.days.length}일</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Users className="h-5 w-5" />
-              <span>{mainPlan?.numberOfPeople}명</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Globe className="h-5 w-5" />
-              <span>{mainPlan?.destination || '여행지 미정'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Activity className="h-5 w-5" />
-              <span>조회수: {mainPlan?.views}</span>
-            </div>
+        </div>
+        
+        {/* 플랜 메타 정보 */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          <div className="flex items-center gap-2 text-gray-600">
+            <Calendar className="h-5 w-5" />
+            <span>{mainPlan?.days.length}일</span>
           </div>
-        </CardHeader>
+          <div className="flex items-center gap-2 text-gray-600">
+            <Users className="h-5 w-5" />
+            <span>{mainPlan?.numberOfPeople}명</span>
+          </div>
+          <div className="flex items-center gap-2 text-gray-600">
+            <Globe className="h-5 w-5" />
+            <span>{mainPlan?.destination || '여행지 미정'}</span>
+          </div>
+          <div className="flex items-center gap-2 text-gray-600">
+            <Activity className="h-5 w-5" />
+            <span>조회수: {mainPlan?.views}</span>
+          </div>
+        </div>
+      </CardHeader>
 
         <CardContent>
           {/* 일별 타임라인 아코디언 */}
