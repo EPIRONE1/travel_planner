@@ -35,9 +35,6 @@ export default function Component() {
             Google로 로그인
           </Button>
         </CardContent>
-        <CardFooter className="flex justify-center text-sm text-muted-foreground">
-          계정이 없으신가요? <a href="#" className="ml-1 underline">회원가입</a>
-        </CardFooter>
       </Card>
     </div>
   )

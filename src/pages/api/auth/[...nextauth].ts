@@ -46,7 +46,7 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
-    signIn: '/login',  // 커스텀 로그인 페이지 경로 (선택사항)
+    signIn: '/social_login',  // 커스텀 로그인 페이지 경로 (선택사항)
   },
 };
 
